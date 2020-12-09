@@ -22,7 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "mlx90614_driver.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -66,7 +66,7 @@ static void MX_I2C1_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+  float temp;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -96,11 +96,20 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    HAL_GPIO_WritePin(GPIOA, WING_R_Pin|EYE_RED_L_Pin|EYE_GREEN_L_Pin|EYE_GREEN_R_Pin, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(GPIOB,  EYE_RED_R_Pin|WING_L_Pin, GPIO_PIN_SET);
-    HAL_Delay(1000);
-    HAL_GPIO_WritePin(GPIOA, WING_R_Pin|EYE_RED_L_Pin|EYE_GREEN_L_Pin|EYE_GREEN_R_Pin, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(GPIOB, EYE_RED_R_Pin|WING_L_Pin, GPIO_PIN_RESET);
+    if ( HAL_OK == mlx90614GetObjectTemp(&hi2c1, &temp))
+    {
+      if (temp > 30.0)
+      {
+        HAL_GPIO_WritePin(GPIOA, WING_R_Pin|EYE_RED_L_Pin|EYE_GREEN_L_Pin|EYE_GREEN_R_Pin, GPIO_PIN_SET);
+        HAL_GPIO_WritePin(GPIOB,  EYE_RED_R_Pin|WING_L_Pin, GPIO_PIN_SET);
+      }
+      else
+      {
+        HAL_GPIO_WritePin(GPIOA, WING_R_Pin|EYE_RED_L_Pin|EYE_GREEN_L_Pin|EYE_GREEN_R_Pin, GPIO_PIN_RESET);
+        HAL_GPIO_WritePin(GPIOB, EYE_RED_R_Pin|WING_L_Pin, GPIO_PIN_RESET);
+      }
+    }
+
     HAL_Delay(1000);
     /* USER CODE END WHILE */
 
