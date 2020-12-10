@@ -71,7 +71,7 @@ static void MX_USART1_UART_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  uint8_t temp;
+  float temp;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -103,7 +103,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-
+     mlx90614GetObjectTemp(&hi2c1, &temp);
     HAL_GPIO_WritePin(GPIOA, WING_R_Pin|EYE_RED_L_Pin|EYE_GREEN_L_Pin|EYE_GREEN_R_Pin, GPIO_PIN_SET);
     HAL_GPIO_WritePin(GPIOB,  EYE_RED_R_Pin|WING_L_Pin, GPIO_PIN_SET);
     HAL_Delay(1000);
@@ -182,7 +182,7 @@ static void MX_I2C1_Init(void)
 
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
-  hi2c1.Init.Timing = 0x00303D5B;
+  hi2c1.Init.Timing = 0x0010061A;
   hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
@@ -228,7 +228,7 @@ static void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
+  huart1.Init.BaudRate = 9600;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
