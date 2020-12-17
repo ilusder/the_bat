@@ -23,6 +23,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "mlx90614_driver.h"
+#include "ssd1306.h"
+#include "fonts.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -96,7 +98,14 @@ int main(void)
   MX_I2C1_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
+  ssd1306_Fill(White);
+  ssd1306_UpdateScreen(&hi2c1);
 
+  HAL_Delay(1000);
+
+  ssd1306_SetCursor(23, 23);
+  ssd1306_WriteString("HELLO", Font_11x18, Black);
+  ssd1306_UpdateScreen(&hi2c1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
