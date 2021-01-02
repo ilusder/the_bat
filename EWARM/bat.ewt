@@ -1212,6 +1212,21 @@
     <group>
         <name>Drivers</name>
         <group>
+            <name>APDS9960</name>
+        </group>
+        <group>
+            <name>CMSIS</name>
+            <file>
+                <name>$PROJ_DIR$\..\Core\Src\system_stm32l0xx.c</name>
+            </file>
+        </group>
+        <group>
+            <name>MLX90614</name>
+            <file>
+                <name>$PROJ_DIR$\..\Drivers\MLX90614\mlx90614_driver.c</name>
+            </file>
+        </group>
+        <group>
             <name>SSD1306</name>
             <file>
                 <name>$PROJ_DIR$\..\Drivers\SSD1306\fonts.c</name>
@@ -1224,18 +1239,6 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Drivers\SSD1306\ssd1306.h</name>
-            </file>
-        </group>
-        <group>
-            <name>CMSIS</name>
-            <file>
-                <name>$PROJ_DIR$\..\Core\Src\system_stm32l0xx.c</name>
-            </file>
-        </group>
-        <group>
-            <name>MLX90614</name>
-            <file>
-                <name>$PROJ_DIR$\..\Drivers\MLX90614\mlx90614_driver.c</name>
             </file>
         </group>
         <group>
@@ -1278,6 +1281,12 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Drivers\STM32L0xx_HAL_Driver\Src\stm32l0xx_hal_rcc_ex.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Drivers\STM32L0xx_HAL_Driver\Src\stm32l0xx_hal_rtc.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Drivers\STM32L0xx_HAL_Driver\Src\stm32l0xx_hal_rtc_ex.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Drivers\STM32L0xx_HAL_Driver\Src\stm32l0xx_hal_tim.c</name>
