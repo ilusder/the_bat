@@ -12,90 +12,156 @@
 //******************************************************************************
 
 
-#define APDS9960_REGMAP_NAME	"apds9960_regmap"
-#define APDS9960_DRV_NAME	"apds9960"
+#ifndef APDS9960_DRIVER_H_
+#define APDS9960_DRIVER_H_
 
-#define APDS9960_REG_RAM_START	0x00
-#define APDS9960_REG_RAM_END	0x7f
 
-#define APDS9960_REG_ENABLE	0x80
-#define APDS9960_REG_ATIME	0x81
-#define APDS9960_REG_WTIME	0x83
+/* APDS-9960 I2C address */
+#define APDS9960_I2C_ADDR       (0x39 << 1)
 
-#define APDS9960_REG_AILTL	0x84
-#define APDS9960_REG_AILTH	0x85
-#define APDS9960_REG_AIHTL	0x86
-#define APDS9960_REG_AIHTH	0x87
+/* Acceptable device IDs */
+#define APDS9960_ID_1           0xAB
+#define APDS9960_ID_2           0x9C 
 
-#define APDS9960_REG_PILT	0x89
-#define APDS9960_REG_PIHT	0x8b
-#define APDS9960_REG_PERS	0x8c
 
-#define APDS9960_REG_CONFIG_1	0x8d
-#define APDS9960_REG_PPULSE	0x8e
+/* APDS-9960 register addresses */
+#define APDS9960_ENABLE         0x80
+#define APDS9960_ATIME          0x81
+#define APDS9960_WTIME          0x83
+#define APDS9960_AILTL          0x84
+#define APDS9960_AILTH          0x85
+#define APDS9960_AIHTL          0x86
+#define APDS9960_AIHTH          0x87
+#define APDS9960_PILT           0x89
+#define APDS9960_PIHT           0x8B
+#define APDS9960_PERS           0x8C
+#define APDS9960_CONFIG1        0x8D
+#define APDS9960_PPULSE         0x8E
+#define APDS9960_CONTROL        0x8F
+#define APDS9960_CONFIG2        0x90
+#define APDS9960_ID             0x92
+#define APDS9960_STATUS         0x93
+#define APDS9960_CDATAL         0x94
+#define APDS9960_CDATAH         0x95
+#define APDS9960_RDATAL         0x96
+#define APDS9960_RDATAH         0x97
+#define APDS9960_GDATAL         0x98
+#define APDS9960_GDATAH         0x99
+#define APDS9960_BDATAL         0x9A
+#define APDS9960_BDATAH         0x9B
+#define APDS9960_PDATA          0x9C
+#define APDS9960_POFFSET_UR     0x9D
+#define APDS9960_POFFSET_DL     0x9E
+#define APDS9960_CONFIG3        0x9F
+#define APDS9960_GPENTH         0xA0
+#define APDS9960_GEXTH          0xA1
+#define APDS9960_GCONF1         0xA2
+#define APDS9960_GCONF2         0xA3
+#define APDS9960_GOFFSET_U      0xA4
+#define APDS9960_GOFFSET_D      0xA5
+#define APDS9960_GOFFSET_L      0xA7
+#define APDS9960_GOFFSET_R      0xA9
+#define APDS9960_GPULSE         0xA6
+#define APDS9960_GCONF3         0xAA
+#define APDS9960_GCONF4         0xAB
+#define APDS9960_GFLVL          0xAE
+#define APDS9960_GSTATUS        0xAF
+#define APDS9960_IFORCE         0xE4
+#define APDS9960_PICLEAR        0xE5
+#define APDS9960_CICLEAR        0xE6
+#define APDS9960_AICLEAR        0xE7
+#define APDS9960_GFIFO_U        0xFC
+#define APDS9960_GFIFO_D        0xFD
+#define APDS9960_GFIFO_L        0xFE
+#define APDS9960_GFIFO_R        0xFF
 
-#define APDS9960_REG_CONTROL	0x8f
-#define APDS9960_REG_CONTROL_AGAIN_MASK		0x03
-#define APDS9960_REG_CONTROL_PGAIN_MASK		0x0c
-#define APDS9960_REG_CONTROL_AGAIN_MASK_SHIFT	0
-#define APDS9960_REG_CONTROL_PGAIN_MASK_SHIFT	2
+/* Bit fields */
+#define APDS9960_PON            0b00000001
+#define APDS9960_AEN            0b00000010
+#define APDS9960_PEN            0b00000100
+#define APDS9960_WEN            0b00001000
+#define APSD9960_AIEN           0b00010000
+#define APDS9960_PIEN           0b00100000
+#define APDS9960_GEN            0b01000000
+#define APDS9960_GVALID         0b00000001
 
-#define APDS9960_REG_CONFIG_2	0x90
-#define APDS9960_REG_CONFIG_2_GGAIN_MASK	0x60
-#define APDS9960_REG_CONFIG_2_GGAIN_MASK_SHIFT	5
+/* Status bit fields */
+#define APDS9960_AVALID         0b0000001
+#define APDS9960_PVALID         0b0000010
+#define APDS9960_GINT           0b0000100
+#define APDS9960_AINT           0b0010000
+#define APDS9960_PGSAT          0b0100000
+#define APDS9960_CPSAT          0b1000000
 
-#define APDS9960_REG_ID		0x92
 
-#define APDS9960_REG_STATUS	0x93
-#define APDS9960_REG_STATUS_PS_INT	BIT(5)
-#define APDS9960_REG_STATUS_ALS_INT	BIT(4)
-#define APDS9960_REG_STATUS_GINT	BIT(2)
 
-#define APDS9960_REG_PDATA	0x9c
-#define APDS9960_REG_POFFSET_UR	0x9d
-#define APDS9960_REG_POFFSET_DL 0x9e
-#define APDS9960_REG_CONFIG_3	0x9f
+/* LED Drive values */
+#define LED_DRIVE_100MA         0
+#define LED_DRIVE_50MA          1
+#define LED_DRIVE_25MA          2
+#define LED_DRIVE_12_5MA        3
 
-#define APDS9960_REG_GPENTH	0xa0
-#define APDS9960_REG_GEXTH	0xa1
+/* Proximity Gain (PGAIN) values */
+#define PGAIN_1X                0
+#define PGAIN_2X                1
+#define PGAIN_4X                2
+#define PGAIN_8X                3
 
-#define APDS9960_REG_GCONF_1	0xa2
-#define APDS9960_REG_GCONF_1_GFIFO_THRES_MASK		0xc0
-#define APDS9960_REG_GCONF_1_GFIFO_THRES_MASK_SHIFT	6
+/* ALS Gain (AGAIN) values */
+#define AGAIN_1X                0
+#define AGAIN_4X                1
+#define AGAIN_16X               2
+#define AGAIN_64X               3
 
-#define APDS9960_REG_GCONF_2	0xa3
-#define APDS9960_REG_GOFFSET_U	0xa4
-#define APDS9960_REG_GOFFSET_D	0xa5
-#define APDS9960_REG_GPULSE	0xa6
-#define APDS9960_REG_GOFFSET_L	0xa7
-#define APDS9960_REG_GOFFSET_R	0xa9
-#define APDS9960_REG_GCONF_3	0xaa
+/* Gesture Gain (GGAIN) values */
+#define GGAIN_1X                0
+#define GGAIN_2X                1
+#define GGAIN_4X                2
+#define GGAIN_8X                3
 
-#define APDS9960_REG_GCONF_4	0xab
-#define APDS9960_REG_GFLVL	0xae
-#define APDS9960_REG_GSTATUS	0xaf
+/* LED Boost values */
+#define LED_BOOST_100           0
+#define LED_BOOST_150           1
+#define LED_BOOST_200           2
+#define LED_BOOST_300           3    
 
-#define APDS9960_REG_IFORCE	0xe4
-#define APDS9960_REG_PICLEAR	0xe5
-#define APDS9960_REG_CICLEAR	0xe6
-#define APDS9960_REG_AICLEAR	0xe7
+/* Gesture wait time values */
+#define GWTIME_0MS              0
+#define GWTIME_2_8MS            1
+#define GWTIME_5_6MS            2
+#define GWTIME_8_4MS            3
+#define GWTIME_14_0MS           4
+#define GWTIME_22_4MS           5
+#define GWTIME_30_8MS           6
+#define GWTIME_39_2MS           7
 
-#define APDS9960_DEFAULT_PERS	0x33
-#define APDS9960_DEFAULT_GPENTH	0x50
-#define APDS9960_DEFAULT_GEXTH	0x40
+/* Default values */
+#define DEFAULT_ATIME           219     // 103ms
+#define DEFAULT_WTIME           246     // 27ms
+#define DEFAULT_PROX_PPULSE     0x87    // 16us, 8 pulses
+#define DEFAULT_GESTURE_PPULSE  0x89    // 16us, 10 pulses
+#define DEFAULT_POFFSET_UR      0       // 0 offset
+#define DEFAULT_POFFSET_DL      0       // 0 offset      
+#define DEFAULT_CONFIG1         0x60    // No 12x wait (WTIME) factor
+#define DEFAULT_LDRIVE          LED_DRIVE_100MA
+#define DEFAULT_PGAIN           PGAIN_4X
+#define DEFAULT_AGAIN           AGAIN_4X
+#define DEFAULT_PILT            0       // Low proximity threshold
+#define DEFAULT_PIHT            50      // High proximity threshold
+#define DEFAULT_AILT            0xFFFF  // Force interrupt for calibration
+#define DEFAULT_AIHT            0
+#define DEFAULT_PERS            0x11    // 2 consecutive prox or ALS for int.
+#define DEFAULT_CONFIG2         0x01    // No saturation interrupts or LED boost  
+#define DEFAULT_CONFIG3         0       // Enable all photodiodes, no SAI
+#define DEFAULT_GPENTH          40      // Threshold for entering gesture mode
+#define DEFAULT_GEXTH           30      // Threshold for exiting gesture mode    
+#define DEFAULT_GCONF1          0x40    // 4 gesture events for int., 1 for exit
+#define DEFAULT_GGAIN           GGAIN_4X
+#define DEFAULT_GLDRIVE         LED_DRIVE_100MA
+#define DEFAULT_GWTIME          GWTIME_2_8MS
+#define DEFAULT_GOFFSET         0       // No offset scaling for gesture mode
+#define DEFAULT_GPULSE          0xC9    // 32us, 10 pulses
+#define DEFAULT_GCONF3          0       // All photodiodes active during gesture
+#define DEFAULT_GIEN            0       // Disable gesture interrupts
 
-#define APDS9960_MAX_PXS_THRES_VAL	255
-#define APDS9960_MAX_ALS_THRES_VAL	0xffff
-#define APDS9960_MAX_INT_TIME_IN_US	1000000
-
-enum apds9960_als_channel_idx {
-	IDX_ALS_CLEAR, IDX_ALS_RED, IDX_ALS_GREEN, IDX_ALS_BLUE,
-};
-
-#define APDS9960_REG_ALS_BASE	0x94
-#define APDS9960_REG_ALS_CHANNEL(_colour) \
-	(APDS9960_REG_ALS_BASE + (IDX_ALS_##_colour * 2))
-
-enum apds9960_gesture_channel_idx {
-	IDX_DIR_UP, IDX_DIR_DOWN, IDX_DIR_LEFT, IDX_DIR_RIGHT,
-};
+#endif //APDS9960_DRIVER_H_
