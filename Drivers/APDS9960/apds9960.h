@@ -15,6 +15,8 @@
 #ifndef APDS9960_DRIVER_H_
 #define APDS9960_DRIVER_H_
 
+#include "stm32l0xx_hal.h"
+
 
 /* APDS-9960 I2C address */
 #define APDS9960_I2C_ADDR       (0x39 << 1)
@@ -163,5 +165,62 @@
 #define DEFAULT_GPULSE          0xC9    // 32us, 10 pulses
 #define DEFAULT_GCONF3          0       // All photodiodes active during gesture
 #define DEFAULT_GIEN            0       // Disable gesture interrupts
+
+
+/* Direction definitions */
+enum {
+  DIR_NONE,
+  DIR_LEFT,
+  DIR_RIGHT,
+  DIR_UP,
+  DIR_DOWN,
+  DIR_NEAR,
+  DIR_FAR,
+  DIR_ALL
+};
+
+/* State definitions */
+enum {
+  NA_STATE,
+  NEAR_STATE,
+  FAR_STATE,
+  ALL_STATE
+};
+
+/* Container for gesture data */
+typedef struct gesture_data_type {
+    uint8_t u_data[32];
+    uint8_t d_data[32];
+    uint8_t l_data[32];
+    uint8_t r_data[32];
+    uint8_t index;
+    uint8_t total_gestures;
+    uint8_t in_threshold;
+    uint8_t out_threshold;
+} gesture_data_type;
+
+
+
+
+
+uint8_t APDS9960_init(I2C_HandleTypeDef *hi2c);
+
+uint8_t APDS9960_setMode(I2C_HandleTypeDef *hi2c, uint8_t mode, uint8_t enable);
+
+uint8_t APDS9960_getMode(I2C_HandleTypeDef *hi2c);
+
+
+uint8_t APDS9960_wireWriteByte(I2C_HandleTypeDef, uint8_t val); 
+
+uint8_t APDS9960_wireReadDataByte(I2C_HandleTypeDef *hi2c, uint8_t reg, uint8_t * val);
+
+uint8_t APDS9960_wireWriteDataBlock(I2C_HandleTypeDef *hi2c,  uint8_t reg,
+                                        uint8_t * val,
+                                        uint8_t len);
+
+uint8_t APDS9960_wireReadDataBlock( I2C_HandleTypeDef *hi2c,  uint8_t reg,
+                                        uint8_t *val,
+                                        uint8_t len);
+
 
 #endif //APDS9960_DRIVER_H_
