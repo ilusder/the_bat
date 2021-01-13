@@ -21,123 +21,6 @@
  * Public methods for controlling the APDS-9960
  ******************************************************************************/
 
-/**
- * @brief Configures I2C communications and initializes registers to defaults
- *
- * @return True if initialized successfully. False otherwise.
- */
-uint8_t APDS9960_init(I2C_HandleTypeDef *hi2c)
-{
-    
-    uint8_t id;
-
-    /* Read ID register and check against known values for APDS-9960 */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_ID, &id) ) {
-        return HAL_ERROR;
-    }
-    if( !(id == APDS9960_ID_1 || id == APDS9960_ID_2) ) {
-        return HAL_ERROR;
-    }
-
-    /* Set ENABLE register to 0 (disable all features) */
-    if( !APDS9960_setMode(hi2c, ALL, OFF) ) {
-        return HAL_ERROR;
-    }
-
-//    /* Set default values for ambient light and proximity registers */
-//    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_ATIME, (uint8_t) DEFAULT_ATIME) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_WTIME, DEFAULT_WTIME) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_PPULSE, DEFAULT_PROX_PPULSE) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_POFFSET_UR, DEFAULT_POFFSET_UR) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_POFFSET_DL, DEFAULT_POFFSET_DL) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_CONFIG1, DEFAULT_CONFIG1) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !setLEDDrive(DEFAULT_LDRIVE) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !setProximityGain(DEFAULT_PGAIN) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !setAmbientLightGain(DEFAULT_AGAIN) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !setProxIntLowThresh(DEFAULT_PILT) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !setProxIntHighThresh(DEFAULT_PIHT) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !setLightIntLowThreshold(DEFAULT_AILT) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !setLightIntHighThreshold(DEFAULT_AIHT) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !wireWriteDataByte(APDS9960_PERS, DEFAULT_PERS) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !wireWriteDataByte(APDS9960_CONFIG2, DEFAULT_CONFIG2) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !wireWriteDataByte(APDS9960_CONFIG3, DEFAULT_CONFIG3) ) {
-//        return HAL_ERROR;
-//    }
-//
-//    /* Set default values for gesture sense registers */
-//    if( !setGestureEnterThresh(DEFAULT_GPENTH) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !setGestureExitThresh(DEFAULT_GEXTH) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !wireWriteDataByte(APDS9960_GCONF1, DEFAULT_GCONF1) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !setGestureGain(DEFAULT_GGAIN) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !setGestureLEDDrive(DEFAULT_GLDRIVE) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !setGestureWaitTime(DEFAULT_GWTIME) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !wireWriteDataByte(APDS9960_GOFFSET_U, DEFAULT_GOFFSET) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !wireWriteDataByte(APDS9960_GOFFSET_D, DEFAULT_GOFFSET) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !wireWriteDataByte(APDS9960_GOFFSET_L, DEFAULT_GOFFSET) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !wireWriteDataByte(APDS9960_GOFFSET_R, DEFAULT_GOFFSET) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !wireWriteDataByte(APDS9960_GPULSE, DEFAULT_GPULSE) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !wireWriteDataByte(APDS9960_GCONF3, DEFAULT_GCONF3) ) {
-//        return HAL_ERROR;
-//    }
-//    if( !setGestureIntEnable(DEFAULT_GIEN) ) {
-//        return HAL_ERROR;
-//    }
-
-    return HAL_OK;
-}
-
 
 uint8_t APDS9960_getMode(I2C_HandleTypeDef *hi2c)
 {
@@ -186,6 +69,1225 @@ uint8_t APDS9960_setMode(I2C_HandleTypeDef *hi2c, uint8_t mode, uint8_t enable)
     return HAL_OK;
 }
 
+
+
+
+/*******************************************************************************
+ * Getters and setters for register values
+ ******************************************************************************/
+
+/**
+ * @brief Returns the lower threshold for proximity detection
+ *
+ * @return lower threshold
+ */
+uint8_t APDS9960_getProxIntLowThresh(I2C_HandleTypeDef *hi2c)
+{
+    uint8_t val;
+
+    /* Read value from PILT register */
+    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_PILT, &val) ) {
+        val = 0;
+    }
+
+    return val;
+}
+
+/**
+ * @brief Sets the lower threshold for proximity detection
+ *
+ * @param[in] threshold the lower proximity threshold
+ * @return True if operation successful. False otherwise.
+ */
+uint8_t APDS9960_setProxIntLowThresh(I2C_HandleTypeDef *hi2c, uint8_t threshold)
+{
+    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_PILT, &threshold) ) {
+        return HAL_ERROR;
+    }
+
+    return HAL_OK;
+}
+
+/**
+ * @brief Returns the high threshold for proximity detection
+ *
+ * @return high threshold
+ */
+uint8_t APDS9960_getProxIntHighThresh(I2C_HandleTypeDef *hi2c)
+{
+    uint8_t val;
+
+    /* Read value from PIHT register */
+    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_PIHT, &val) ) {
+        val = 0;
+    }
+
+    return val;
+}
+
+/**
+ * @brief Sets the high threshold for proximity detection
+ *
+ * @param[in] threshold the high proximity threshold
+ * @return True if operation successful. False otherwise.
+ */
+uint8_t APDS9960_setProxIntHighThresh(I2C_HandleTypeDef *hi2c, uint8_t threshold)
+{
+    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_PIHT, &threshold) ) {
+        return HAL_ERROR;
+    }
+
+    return HAL_OK;
+}
+
+/**
+ * @brief Returns LED drive strength for proximity and ALS
+ *
+ * Value    LED Current
+ *   0        100 mA
+ *   1         50 mA
+ *   2         25 mA
+ *   3         12.5 mA
+ *
+ * @return the value of the LED drive strength. 0xFF on failure.
+ */
+uint8_t APDS9960_getLEDDrive(I2C_HandleTypeDef *hi2c)
+{
+    uint8_t val;
+
+    /* Read value from CONTROL register */
+    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_CONTROL, &val) ) {
+        return HAL_ERROR;
+    }
+
+    /* Shift and mask out LED drive bits */
+    val = (val >> 6) & 0b00000011;
+
+    return val;
+}
+
+/**
+ * @brief Sets the LED drive strength for proximity and ALS
+ *
+ * Value    LED Current
+ *   0        100 mA
+ *   1         50 mA
+ *   2         25 mA
+ *   3         12.5 mA
+ *
+ * @param[in] drive the value (0-3) for the LED drive strength
+ * @return True if operation successful. False otherwise.
+ */
+uint8_t APDS9960_setLEDDrive(I2C_HandleTypeDef *hi2c, uint8_t drive)
+{
+    uint8_t val;
+
+    /* Read value from CONTROL register */
+    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_CONTROL, &val) ) {
+        return HAL_ERROR;
+    }
+
+    /* Set bits in register to given value */
+    drive &= 0b00000011;
+    drive = drive << 6;
+    val &= 0b00111111;
+    val |= drive;
+
+    /* Write register value back into CONTROL register */
+    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_CONTROL, &val) ) {
+        return HAL_ERROR;
+    }
+
+    return HAL_OK;
+}
+
+/**
+ * @brief Returns receiver gain for proximity detection
+ *
+ * Value    Gain
+ *   0       1x
+ *   1       2x
+ *   2       4x
+ *   3       8x
+ *
+ * @return the value of the proximity gain. 0xFF on failure.
+ */
+uint8_t APDS9960_getProximityGain(I2C_HandleTypeDef *hi2c)
+{
+    uint8_t val;
+
+    /* Read value from CONTROL register */
+    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_CONTROL, &val) ) {
+        return HAL_ERROR;
+    }
+
+    /* Shift and mask out PDRIVE bits */
+    val = (val >> 2) & 0b00000011;
+
+    return val;
+}
+
+/**
+ * @brief Sets the receiver gain for proximity detection
+ *
+ * Value    Gain
+ *   0       1x
+ *   1       2x
+ *   2       4x
+ *   3       8x
+ *
+ * @param[in] drive the value (0-3) for the gain
+ * @return True if operation successful. False otherwise.
+ */
+bool SparkFun_APDS9960::setProximityGain(uint8_t drive)
+{
+    uint8_t val;
+
+    /* Read value from CONTROL register */
+    if( !wireReadDataByte(APDS9960_CONTROL, val) ) {
+        return false;
+    }
+
+    /* Set bits in register to given value */
+    drive &= 0b00000011;
+    drive = drive << 2;
+    val &= 0b11110011;
+    val |= drive;
+
+    /* Write register value back into CONTROL register */
+    if( !wireWriteDataByte(APDS9960_CONTROL, val) ) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Returns receiver gain for the ambient light sensor (ALS)
+ *
+ * Value    Gain
+ *   0        1x
+ *   1        4x
+ *   2       16x
+ *   3       64x
+ *
+ * @return the value of the ALS gain. 0xFF on failure.
+ */
+uint8_t SparkFun_APDS9960::getAmbientLightGain()
+{
+    uint8_t val;
+
+    /* Read value from CONTROL register */
+    if( !wireReadDataByte(APDS9960_CONTROL, val) ) {
+        return ERROR;
+    }
+
+    /* Shift and mask out ADRIVE bits */
+    val &= 0b00000011;
+
+    return val;
+}
+
+/**
+ * @brief Sets the receiver gain for the ambient light sensor (ALS)
+ *
+ * Value    Gain
+ *   0        1x
+ *   1        4x
+ *   2       16x
+ *   3       64x
+ *
+ * @param[in] drive the value (0-3) for the gain
+ * @return True if operation successful. False otherwise.
+ */
+bool SparkFun_APDS9960::setAmbientLightGain(uint8_t drive)
+{
+    uint8_t val;
+
+    /* Read value from CONTROL register */
+    if( !wireReadDataByte(APDS9960_CONTROL, val) ) {
+        return false;
+    }
+
+    /* Set bits in register to given value */
+    drive &= 0b00000011;
+    val &= 0b11111100;
+    val |= drive;
+
+    /* Write register value back into CONTROL register */
+    if( !wireWriteDataByte(APDS9960_CONTROL, val) ) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Get the current LED boost value
+ *
+ * Value  Boost Current
+ *   0        100%
+ *   1        150%
+ *   2        200%
+ *   3        300%
+ *
+ * @return The LED boost value. 0xFF on failure.
+ */
+uint8_t SparkFun_APDS9960::getLEDBoost()
+{
+    uint8_t val;
+
+    /* Read value from CONFIG2 register */
+    if( !wireReadDataByte(APDS9960_CONFIG2, val) ) {
+        return ERROR;
+    }
+
+    /* Shift and mask out LED_BOOST bits */
+    val = (val >> 4) & 0b00000011;
+
+    return val;
+}
+
+/**
+ * @brief Sets the LED current boost value
+ *
+ * Value  Boost Current
+ *   0        100%
+ *   1        150%
+ *   2        200%
+ *   3        300%
+ *
+ * @param[in] drive the value (0-3) for current boost (100-300%)
+ * @return True if operation successful. False otherwise.
+ */
+bool SparkFun_APDS9960::setLEDBoost(uint8_t boost)
+{
+    uint8_t val;
+
+    /* Read value from CONFIG2 register */
+    if( !wireReadDataByte(APDS9960_CONFIG2, val) ) {
+        return false;
+    }
+
+    /* Set bits in register to given value */
+    boost &= 0b00000011;
+    boost = boost << 4;
+    val &= 0b11001111;
+    val |= boost;
+
+    /* Write register value back into CONFIG2 register */
+    if( !wireWriteDataByte(APDS9960_CONFIG2, val) ) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Gets proximity gain compensation enable
+ *
+ * @return 1 if compensation is enabled. 0 if not. 0xFF on error.
+ */
+uint8_t SparkFun_APDS9960::getProxGainCompEnable()
+{
+    uint8_t val;
+
+    /* Read value from CONFIG3 register */
+    if( !wireReadDataByte(APDS9960_CONFIG3, val) ) {
+        return ERROR;
+    }
+
+    /* Shift and mask out PCMP bits */
+    val = (val >> 5) & 0b00000001;
+
+    return val;
+}
+
+/**
+ * @brief Sets the proximity gain compensation enable
+ *
+ * @param[in] enable 1 to enable compensation. 0 to disable compensation.
+ * @return True if operation successful. False otherwise.
+ */
+ bool SparkFun_APDS9960::setProxGainCompEnable(uint8_t enable)
+{
+    uint8_t val;
+
+    /* Read value from CONFIG3 register */
+    if( !wireReadDataByte(APDS9960_CONFIG3, val) ) {
+        return false;
+    }
+
+    /* Set bits in register to given value */
+    enable &= 0b00000001;
+    enable = enable << 5;
+    val &= 0b11011111;
+    val |= enable;
+
+    /* Write register value back into CONFIG3 register */
+    if( !wireWriteDataByte(APDS9960_CONFIG3, val) ) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Gets the current mask for enabled/disabled proximity photodiodes
+ *
+ * 1 = disabled, 0 = enabled
+ * Bit    Photodiode
+ *  3       UP
+ *  2       DOWN
+ *  1       LEFT
+ *  0       RIGHT
+ *
+ * @return Current proximity mask for photodiodes. 0xFF on error.
+ */
+uint8_t SparkFun_APDS9960::getProxPhotoMask()
+{
+    uint8_t val;
+
+    /* Read value from CONFIG3 register */
+    if( !wireReadDataByte(APDS9960_CONFIG3, val) ) {
+        return ERROR;
+    }
+
+    /* Mask out photodiode enable mask bits */
+    val &= 0b00001111;
+
+    return val;
+}
+
+/**
+ * @brief Sets the mask for enabling/disabling proximity photodiodes
+ *
+ * 1 = disabled, 0 = enabled
+ * Bit    Photodiode
+ *  3       UP
+ *  2       DOWN
+ *  1       LEFT
+ *  0       RIGHT
+ *
+ * @param[in] mask 4-bit mask value
+ * @return True if operation successful. False otherwise.
+ */
+bool SparkFun_APDS9960::setProxPhotoMask(uint8_t mask)
+{
+    uint8_t val;
+
+    /* Read value from CONFIG3 register */
+    if( !wireReadDataByte(APDS9960_CONFIG3, val) ) {
+        return false;
+    }
+
+    /* Set bits in register to given value */
+    mask &= 0b00001111;
+    val &= 0b11110000;
+    val |= mask;
+
+    /* Write register value back into CONFIG3 register */
+    if( !wireWriteDataByte(APDS9960_CONFIG3, val) ) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Gets the entry proximity threshold for gesture sensing
+ *
+ * @return Current entry proximity threshold.
+ */
+uint8_t SparkFun_APDS9960::getGestureEnterThresh()
+{
+    uint8_t val;
+
+    /* Read value from GPENTH register */
+    if( !wireReadDataByte(APDS9960_GPENTH, val) ) {
+        val = 0;
+    }
+
+    return val;
+}
+
+/**
+ * @brief Sets the entry proximity threshold for gesture sensing
+ *
+ * @param[in] threshold proximity value needed to start gesture mode
+ * @return True if operation successful. False otherwise.
+ */
+bool SparkFun_APDS9960::setGestureEnterThresh(uint8_t threshold)
+{
+    if( !wireWriteDataByte(APDS9960_GPENTH, threshold) ) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Gets the exit proximity threshold for gesture sensing
+ *
+ * @return Current exit proximity threshold.
+ */
+uint8_t SparkFun_APDS9960::getGestureExitThresh()
+{
+    uint8_t val;
+
+    /* Read value from GEXTH register */
+    if( !wireReadDataByte(APDS9960_GEXTH, val) ) {
+        val = 0;
+    }
+
+    return val;
+}
+
+/**
+ * @brief Sets the exit proximity threshold for gesture sensing
+ *
+ * @param[in] threshold proximity value needed to end gesture mode
+ * @return True if operation successful. False otherwise.
+ */
+bool SparkFun_APDS9960::setGestureExitThresh(uint8_t threshold)
+{
+    if( !wireWriteDataByte(APDS9960_GEXTH, threshold) ) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Gets the gain of the photodiode during gesture mode
+ *
+ * Value    Gain
+ *   0       1x
+ *   1       2x
+ *   2       4x
+ *   3       8x
+ *
+ * @return the current photodiode gain. 0xFF on error.
+ */
+uint8_t SparkFun_APDS9960::getGestureGain()
+{
+    uint8_t val;
+
+    /* Read value from GCONF2 register */
+    if( !wireReadDataByte(APDS9960_GCONF2, val) ) {
+        return ERROR;
+    }
+
+    /* Shift and mask out GGAIN bits */
+    val = (val >> 5) & 0b00000011;
+
+    return val;
+}
+
+/**
+ * @brief Sets the gain of the photodiode during gesture mode
+ *
+ * Value    Gain
+ *   0       1x
+ *   1       2x
+ *   2       4x
+ *   3       8x
+ *
+ * @param[in] gain the value for the photodiode gain
+ * @return True if operation successful. False otherwise.
+ */
+bool SparkFun_APDS9960::setGestureGain(uint8_t gain)
+{
+    uint8_t val;
+
+    /* Read value from GCONF2 register */
+    if( !wireReadDataByte(APDS9960_GCONF2, val) ) {
+        return false;
+    }
+
+    /* Set bits in register to given value */
+    gain &= 0b00000011;
+    gain = gain << 5;
+    val &= 0b10011111;
+    val |= gain;
+
+    /* Write register value back into GCONF2 register */
+    if( !wireWriteDataByte(APDS9960_GCONF2, val) ) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Gets the drive current of the LED during gesture mode
+ *
+ * Value    LED Current
+ *   0        100 mA
+ *   1         50 mA
+ *   2         25 mA
+ *   3         12.5 mA
+ *
+ * @return the LED drive current value. 0xFF on error.
+ */
+uint8_t SparkFun_APDS9960::getGestureLEDDrive()
+{
+    uint8_t val;
+
+    /* Read value from GCONF2 register */
+    if( !wireReadDataByte(APDS9960_GCONF2, val) ) {
+        return ERROR;
+    }
+
+    /* Shift and mask out GLDRIVE bits */
+    val = (val >> 3) & 0b00000011;
+
+    return val;
+}
+
+/**
+ * @brief Sets the LED drive current during gesture mode
+ *
+ * Value    LED Current
+ *   0        100 mA
+ *   1         50 mA
+ *   2         25 mA
+ *   3         12.5 mA
+ *
+ * @param[in] drive the value for the LED drive current
+ * @return True if operation successful. False otherwise.
+ */
+bool SparkFun_APDS9960::setGestureLEDDrive(uint8_t drive)
+{
+    uint8_t val;
+
+    /* Read value from GCONF2 register */
+    if( !wireReadDataByte(APDS9960_GCONF2, val) ) {
+        return false;
+    }
+
+    /* Set bits in register to given value */
+    drive &= 0b00000011;
+    drive = drive << 3;
+    val &= 0b11100111;
+    val |= drive;
+
+    /* Write register value back into GCONF2 register */
+    if( !wireWriteDataByte(APDS9960_GCONF2, val) ) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Gets the time in low power mode between gesture detections
+ *
+ * Value    Wait time
+ *   0          0 ms
+ *   1          2.8 ms
+ *   2          5.6 ms
+ *   3          8.4 ms
+ *   4         14.0 ms
+ *   5         22.4 ms
+ *   6         30.8 ms
+ *   7         39.2 ms
+ *
+ * @return the current wait time between gestures. 0xFF on error.
+ */
+uint8_t SparkFun_APDS9960::getGestureWaitTime()
+{
+    uint8_t val;
+
+    /* Read value from GCONF2 register */
+    if( !wireReadDataByte(APDS9960_GCONF2, val) ) {
+        return ERROR;
+    }
+
+    /* Mask out GWTIME bits */
+    val &= 0b00000111;
+
+    return val;
+}
+
+/**
+ * @brief Sets the time in low power mode between gesture detections
+ *
+ * Value    Wait time
+ *   0          0 ms
+ *   1          2.8 ms
+ *   2          5.6 ms
+ *   3          8.4 ms
+ *   4         14.0 ms
+ *   5         22.4 ms
+ *   6         30.8 ms
+ *   7         39.2 ms
+ *
+ * @param[in] the value for the wait time
+ * @return True if operation successful. False otherwise.
+ */
+bool SparkFun_APDS9960::setGestureWaitTime(uint8_t time)
+{
+    uint8_t val;
+
+    /* Read value from GCONF2 register */
+    if( !wireReadDataByte(APDS9960_GCONF2, val) ) {
+        return false;
+    }
+
+    /* Set bits in register to given value */
+    time &= 0b00000111;
+    val &= 0b11111000;
+    val |= time;
+
+    /* Write register value back into GCONF2 register */
+    if( !wireWriteDataByte(APDS9960_GCONF2, val) ) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Gets the low threshold for ambient light interrupts
+ *
+ * @param[out] threshold current low threshold stored on the APDS-9960
+ * @return True if operation successful. False otherwise.
+ */
+bool SparkFun_APDS9960::getLightIntLowThreshold(uint16_t &threshold)
+{
+    uint8_t val_byte;
+    threshold = 0;
+
+    /* Read value from ambient light low threshold, low byte register */
+    if( !wireReadDataByte(APDS9960_AILTL, val_byte) ) {
+        return false;
+    }
+    threshold = val_byte;
+
+    /* Read value from ambient light low threshold, high byte register */
+    if( !wireReadDataByte(APDS9960_AILTH, val_byte) ) {
+        return false;
+    }
+    threshold = threshold + ((uint16_t)val_byte << 8);
+
+    return true;
+}
+
+/**
+ * @brief Sets the low threshold for ambient light interrupts
+ *
+ * @param[in] threshold low threshold value for interrupt to trigger
+ * @return True if operation successful. False otherwise.
+ */
+bool SparkFun_APDS9960::setLightIntLowThreshold(uint16_t threshold)
+{
+    uint8_t val_low;
+    uint8_t val_high;
+
+    /* Break 16-bit threshold into 2 8-bit values */
+    val_low = threshold & 0x00FF;
+    val_high = (threshold & 0xFF00) >> 8;
+
+    /* Write low byte */
+    if( !wireWriteDataByte(APDS9960_AILTL, val_low) ) {
+        return false;
+    }
+
+    /* Write high byte */
+    if( !wireWriteDataByte(APDS9960_AILTH, val_high) ) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Gets the high threshold for ambient light interrupts
+ *
+ * @param[out] threshold current low threshold stored on the APDS-9960
+ * @return True if operation successful. False otherwise.
+ */
+bool SparkFun_APDS9960::getLightIntHighThreshold(uint16_t &threshold)
+{
+    uint8_t val_byte;
+    threshold = 0;
+
+    /* Read value from ambient light high threshold, low byte register */
+    if( !wireReadDataByte(APDS9960_AIHTL, val_byte) ) {
+        return false;
+    }
+    threshold = val_byte;
+
+    /* Read value from ambient light high threshold, high byte register */
+    if( !wireReadDataByte(APDS9960_AIHTH, val_byte) ) {
+        return false;
+    }
+    threshold = threshold + ((uint16_t)val_byte << 8);
+
+    return true;
+}
+
+/**
+ * @brief Sets the high threshold for ambient light interrupts
+ *
+ * @param[in] threshold high threshold value for interrupt to trigger
+ * @return True if operation successful. False otherwise.
+ */
+bool SparkFun_APDS9960::setLightIntHighThreshold(uint16_t threshold)
+{
+    uint8_t val_low;
+    uint8_t val_high;
+
+    /* Break 16-bit threshold into 2 8-bit values */
+    val_low = threshold & 0x00FF;
+    val_high = (threshold & 0xFF00) >> 8;
+
+    /* Write low byte */
+    if( !wireWriteDataByte(APDS9960_AIHTL, val_low) ) {
+        return false;
+    }
+
+    /* Write high byte */
+    if( !wireWriteDataByte(APDS9960_AIHTH, val_high) ) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Gets the low threshold for proximity interrupts
+ *
+ * @param[out] threshold current low threshold stored on the APDS-9960
+ * @return True if operation successful. False otherwise.
+ */
+bool SparkFun_APDS9960::getProximityIntLowThreshold(uint8_t &threshold)
+{
+    threshold = 0;
+
+    /* Read value from proximity low threshold register */
+    if( !wireReadDataByte(APDS9960_PILT, threshold) ) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Sets the low threshold for proximity interrupts
+ *
+ * @param[in] threshold low threshold value for interrupt to trigger
+ * @return True if operation successful. False otherwise.
+ */
+bool SparkFun_APDS9960::setProximityIntLowThreshold(uint8_t threshold)
+{
+
+    /* Write threshold value to register */
+    if( !wireWriteDataByte(APDS9960_PILT, threshold) ) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Gets the high threshold for proximity interrupts
+ *
+ * @param[out] threshold current low threshold stored on the APDS-9960
+ * @return True if operation successful. False otherwise.
+ */
+bool SparkFun_APDS9960::getProximityIntHighThreshold(uint8_t &threshold)
+{
+    threshold = 0;
+
+    /* Read value from proximity low threshold register */
+    if( !wireReadDataByte(APDS9960_PIHT, threshold) ) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Sets the high threshold for proximity interrupts
+ *
+ * @param[in] threshold high threshold value for interrupt to trigger
+ * @return True if operation successful. False otherwise.
+ */
+bool SparkFun_APDS9960::setProximityIntHighThreshold(uint8_t threshold)
+{
+
+    /* Write threshold value to register */
+    if( !wireWriteDataByte(APDS9960_PIHT, threshold) ) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Gets if ambient light interrupts are enabled or not
+ *
+ * @return 1 if interrupts are enabled, 0 if not. 0xFF on error.
+ */
+uint8_t SparkFun_APDS9960::getAmbientLightIntEnable()
+{
+    uint8_t val;
+
+    /* Read value from ENABLE register */
+    if( !wireReadDataByte(APDS9960_ENABLE, val) ) {
+        return ERROR;
+    }
+
+    /* Shift and mask out AIEN bit */
+    val = (val >> 4) & 0b00000001;
+
+    return val;
+}
+
+/**
+ * @brief Turns ambient light interrupts on or off
+ *
+ * @param[in] enable 1 to enable interrupts, 0 to turn them off
+ * @return True if operation successful. False otherwise.
+ */
+bool SparkFun_APDS9960::setAmbientLightIntEnable(uint8_t enable)
+{
+    uint8_t val;
+
+    /* Read value from ENABLE register */
+    if( !wireReadDataByte(APDS9960_ENABLE, val) ) {
+        return false;
+    }
+
+    /* Set bits in register to given value */
+    enable &= 0b00000001;
+    enable = enable << 4;
+    val &= 0b11101111;
+    val |= enable;
+
+    /* Write register value back into ENABLE register */
+    if( !wireWriteDataByte(APDS9960_ENABLE, val) ) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Gets if proximity interrupts are enabled or not
+ *
+ * @return 1 if interrupts are enabled, 0 if not. 0xFF on error.
+ */
+uint8_t SparkFun_APDS9960::getProximityIntEnable()
+{
+    uint8_t val;
+
+    /* Read value from ENABLE register */
+    if( !wireReadDataByte(APDS9960_ENABLE, val) ) {
+        return ERROR;
+    }
+
+    /* Shift and mask out PIEN bit */
+    val = (val >> 5) & 0b00000001;
+
+    return val;
+}
+
+/**
+ * @brief Turns proximity interrupts on or off
+ *
+ * @param[in] enable 1 to enable interrupts, 0 to turn them off
+ * @return True if operation successful. False otherwise.
+ */
+bool SparkFun_APDS9960::setProximityIntEnable(uint8_t enable)
+{
+    uint8_t val;
+
+    /* Read value from ENABLE register */
+    if( !wireReadDataByte(APDS9960_ENABLE, val) ) {
+        return false;
+    }
+
+    /* Set bits in register to given value */
+    enable &= 0b00000001;
+    enable = enable << 5;
+    val &= 0b11011111;
+    val |= enable;
+
+    /* Write register value back into ENABLE register */
+    if( !wireWriteDataByte(APDS9960_ENABLE, val) ) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Gets if gesture interrupts are enabled or not
+ *
+ * @return 1 if interrupts are enabled, 0 if not. 0xFF on error.
+ */
+uint8_t SparkFun_APDS9960::getGestureIntEnable()
+{
+    uint8_t val;
+
+    /* Read value from GCONF4 register */
+    if( !wireReadDataByte(APDS9960_GCONF4, val) ) {
+        return ERROR;
+    }
+
+    /* Shift and mask out GIEN bit */
+    val = (val >> 1) & 0b00000001;
+
+    return val;
+}
+
+/**
+ * @brief Turns gesture-related interrupts on or off
+ *
+ * @param[in] enable 1 to enable interrupts, 0 to turn them off
+ * @return True if operation successful. False otherwise.
+ */
+bool SparkFun_APDS9960::setGestureIntEnable(uint8_t enable)
+{
+    uint8_t val;
+
+    /* Read value from GCONF4 register */
+    if( !wireReadDataByte(APDS9960_GCONF4, val) ) {
+        return false;
+    }
+
+    /* Set bits in register to given value */
+    enable &= 0b00000001;
+    enable = enable << 1;
+    val &= 0b11111101;
+    val |= enable;
+
+    /* Write register value back into GCONF4 register */
+    if( !wireWriteDataByte(APDS9960_GCONF4, val) ) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Clears the ambient light interrupt
+ *
+ * @return True if operation completed successfully. False otherwise.
+ */
+bool SparkFun_APDS9960::clearAmbientLightInt()
+{
+    uint8_t throwaway;
+    if( !wireReadDataByte(APDS9960_AICLEAR, throwaway) ) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Clears the proximity interrupt
+ *
+ * @return True if operation completed successfully. False otherwise.
+ */
+bool SparkFun_APDS9960::clearProximityInt()
+{
+    uint8_t throwaway;
+    if( !wireReadDataByte(APDS9960_PICLEAR, throwaway) ) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Tells if the gesture state machine is currently running
+ *
+ * @return 1 if gesture state machine is running, 0 if not. 0xFF on error.
+ */
+uint8_t SparkFun_APDS9960::getGestureMode(I2C_HandleTypeDef *hi2c)
+{
+    uint8_t val;
+
+    /* Read value from GCONF4 register */
+    if( !wireReadDataByte(hi2c, APDS9960_GCONF4, val) ) {
+        return HAL_ERROR;
+    }
+
+    /* Mask out GMODE bit */
+    val &= 0b00000001;
+
+    return val;
+}
+
+/**
+ * @brief Tells the state machine to either enter or exit gesture state machine
+ *
+ * @param[in] mode 1 to enter gesture state machine, 0 to exit.
+ * @return True if operation successful. False otherwise.
+ */
+uint8_t APDS9960_setGestureMode(I2C_HandleTypeDef *hi2c, uint8_t mode)
+{
+    uint8_t val;
+
+    /* Read value from GCONF4 register */
+    if( !wireReadDataByte(hi2c, APDS9960_GCONF4, val) ) {
+        return HAL_ERROR;
+    }
+
+    /* Set bits in register to given value */
+    mode &= 0b00000001;
+    val &= 0b11111110;
+    val |= mode;
+
+    /* Write register value back into GCONF4 register */
+    if( !wireWriteDataByte(hi2c, APDS9960_GCONF4, val) ) {
+        return HAL_ERROR;
+    }
+
+    return HAL_OK;
+}
+
+
+/*******************************************************************************
+ * Public methods for controlling the APDS-9960
+ ******************************************************************************/
+
+/**
+ * @brief Configures I2C communications and initializes registers to defaults
+ *
+ * @return True if initialized successfully. False otherwise.
+ */
+uint8_t APDS9960_init(I2C_HandleTypeDef *hi2c)
+{
+    
+    uint8_t id;
+    uint8_t result;
+
+    /* Read ID register and check against known values for APDS-9960 */
+    result = APDS9960_wireReadDataByte(hi2c, APDS9960_ID, &id);
+    if (HAL_ERROR == result)
+    {
+        return HAL_ERROR;
+    }
+    if( !(id == APDS9960_ID_1 || id == APDS9960_ID_2) ) {
+        return HAL_ERROR;
+    }
+
+    /* Set ENABLE register to 0 (disable all features) */
+    if( !APDS9960_setMode(hi2c, ALL, OFF) ) {
+        return HAL_ERROR;
+    }
+    id = DEFAULT_ATIME;
+    /* Set default values for ambient light and proximity registers */
+    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_ATIME, &id) ) {
+        return HAL_ERROR;
+    }
+    id = DEFAULT_WTIME;
+    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_WTIME, &id) ) {
+      return HAL_ERROR;
+    }
+    
+    id = DEFAULT_PROX_PPULSE;
+    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_PPULSE, &id) ) {
+        return HAL_ERROR;
+    }
+    
+    id = DEFAULT_POFFSET_UR;
+    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_POFFSET_UR, &id) ) {
+        return HAL_ERROR;
+    }
+    
+    id = DEFAULT_POFFSET_DL;
+    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_POFFSET_DL, &id) ) {
+        return HAL_ERROR;
+    }
+    
+    id = DEFAULT_CONFIG1;
+    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_CONFIG1, &id) ) {
+        return HAL_ERROR;
+    }
+    
+    
+    if( !APDS9960_setLEDDrive(hi2c, DEFAULT_LDRIVE) ) {
+        return HAL_ERROR;
+    }
+    if( !APDS9960_setProximityGain(hi2c, DEFAULT_PGAIN) ) {
+        return HAL_ERROR;
+    }
+    if( !APDS9960_setAmbientLightGain(hi2c, DEFAULT_AGAIN) ) {
+        return HAL_ERROR;
+    }
+    if( !APDS9960_setProxIntLowThresh(hi2c, DEFAULT_PILT) ) {
+        return HAL_ERROR;
+    }
+    if( !APDS9960_setProxIntHighThresh(hi2c, DEFAULT_PIHT) ) {
+        return HAL_ERROR;
+    }
+    if( !setLightIntLowThreshold(DEFAULT_AILT) ) {
+        return HAL_ERROR;
+    }
+    if( !setLightIntHighThreshold(DEFAULT_AIHT) ) {
+        return HAL_ERROR;
+    }
+    if( !wireWriteDataByte(APDS9960_PERS, DEFAULT_PERS) ) {
+        return HAL_ERROR;
+    }
+    if( !wireWriteDataByte(APDS9960_CONFIG2, DEFAULT_CONFIG2) ) {
+        return HAL_ERROR;
+    }
+    if( !wireWriteDataByte(APDS9960_CONFIG3, DEFAULT_CONFIG3) ) {
+        return HAL_ERROR;
+    }
+
+    /* Set default values for gesture sense registers */
+    if( !setGestureEnterThresh(DEFAULT_GPENTH) ) {
+        return HAL_ERROR;
+    }
+    if( !setGestureExitThresh(DEFAULT_GEXTH) ) {
+        return HAL_ERROR;
+    }
+    if( !wireWriteDataByte(APDS9960_GCONF1, DEFAULT_GCONF1) ) {
+        return HAL_ERROR;
+    }
+    if( !setGestureGain(DEFAULT_GGAIN) ) {
+        return HAL_ERROR;
+    }
+    if( !setGestureLEDDrive(DEFAULT_GLDRIVE) ) {
+        return HAL_ERROR;
+    }
+    if( !setGestureWaitTime(DEFAULT_GWTIME) ) {
+        return HAL_ERROR;
+    }
+    if( !wireWriteDataByte(APDS9960_GOFFSET_U, DEFAULT_GOFFSET) ) {
+        return HAL_ERROR;
+    }
+    if( !wireWriteDataByte(APDS9960_GOFFSET_D, DEFAULT_GOFFSET) ) {
+        return HAL_ERROR;
+    }
+    if( !wireWriteDataByte(APDS9960_GOFFSET_L, DEFAULT_GOFFSET) ) {
+        return HAL_ERROR;
+    }
+    if( !wireWriteDataByte(APDS9960_GOFFSET_R, DEFAULT_GOFFSET) ) {
+        return HAL_ERROR;
+    }
+    if( !wireWriteDataByte(APDS9960_GPULSE, DEFAULT_GPULSE) ) {
+        return HAL_ERROR;
+    }
+    if( !wireWriteDataByte(APDS9960_GCONF3, DEFAULT_GCONF3) ) {
+        return HAL_ERROR;
+    }
+    if( !setGestureIntEnable(DEFAULT_GIEN) ) {
+        return HAL_ERROR;
+    }
+
+    return HAL_OK;
+}
+
+
 /*******************************************************************************
  * Raw I2C Reads and Writes
  ******************************************************************************/
@@ -202,7 +1304,7 @@ uint8_t APDS9960_wireWriteDataByte(I2C_HandleTypeDef *hi2c, uint8_t reg, uint8_t
 {
 
   uint8_t result;
-  result = HAL_I2C_Mem_Write(hi2c, APDS9960_I2C_ADDR, reg, 1, val, 1, 100);
+  result = HAL_I2C_Mem_Write(hi2c, APDS9960_I2C_ADDR, reg, I2C_MEMADD_SIZE_8BIT, val, 1, 100);
   
   return result;
 }
@@ -226,7 +1328,7 @@ uint8_t APDS9960_wireWriteDataBlock(I2C_HandleTypeDef *hi2c,  uint8_t reg,
 
 
     /* Write block data */
-    result = HAL_I2C_Mem_Write(hi2c, APDS9960_I2C_ADDR, reg, 1, val, len, 100);
+    result = HAL_I2C_Mem_Write(hi2c, APDS9960_I2C_ADDR, reg, I2C_MEMADD_SIZE_8BIT, val, len, 100);
     
 
     return result;
@@ -247,7 +1349,7 @@ uint8_t APDS9960_wireReadDataByte(I2C_HandleTypeDef *hi2c, uint8_t reg, uint8_t 
 
 
     /* Write block data */
-    result = HAL_I2C_Mem_Read(hi2c, APDS9960_I2C_ADDR, reg, 1, val, 1, 100);
+    result = HAL_I2C_Mem_Read(hi2c, APDS9960_I2C_ADDR, reg, I2C_MEMADD_SIZE_8BIT, val, 1, 100);
     
 
     return result;
@@ -271,7 +1373,7 @@ uint8_t APDS9960_wireReadDataBlock( I2C_HandleTypeDef *hi2c,  uint8_t reg,
 
 
     /* Read block data */
-    result = HAL_I2C_Mem_Read(hi2c, APDS9960_I2C_ADDR, reg, 1, val, len, 100);
+    result = HAL_I2C_Mem_Read(hi2c, APDS9960_I2C_ADDR, reg, I2C_MEMADD_SIZE_8BIT, val, len, 100);
     
 
     return result;

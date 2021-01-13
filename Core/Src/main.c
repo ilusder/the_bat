@@ -161,7 +161,7 @@ int main(void)
   ssd1306_UpdateScreen(&hi2c1);
   
   
-  //APDS9960_init(&hi2c1);
+  APDS9960_init(&hi2c1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
