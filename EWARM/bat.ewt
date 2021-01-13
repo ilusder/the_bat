@@ -1214,6 +1214,9 @@
         <group>
             <name>APDS9960</name>
             <file>
+                <name>$PROJ_DIR$\..\Drivers\APDS9960\apds9960.c</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Drivers\APDS9960\apds9960.h</name>
             </file>
         </group>

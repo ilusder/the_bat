@@ -167,6 +167,22 @@
 #define DEFAULT_GIEN            0       // Disable gesture interrupts
 
 
+
+/* On/Off definitions */
+#define OFF                     0
+#define ON                      1
+
+/* Acceptable parameters for setMode */
+#define POWER                   0
+#define AMBIENT_LIGHT           1
+#define PROXIMITY               2
+#define WAIT                    3
+#define AMBIENT_LIGHT_INT       4
+#define PROXIMITY_INT           5
+#define GESTURE                 6
+#define ALL                     7
+
+
 /* Direction definitions */
 enum {
   DIR_NONE,
@@ -210,12 +226,12 @@ uint8_t APDS9960_setMode(I2C_HandleTypeDef *hi2c, uint8_t mode, uint8_t enable);
 uint8_t APDS9960_getMode(I2C_HandleTypeDef *hi2c);
 
 
-uint8_t APDS9960_wireWriteByte(I2C_HandleTypeDef, uint8_t val); 
+uint8_t APDS9960_wireWriteDataByte(I2C_HandleTypeDef *hi2c, uint8_t reg, uint8_t * val);
 
 uint8_t APDS9960_wireReadDataByte(I2C_HandleTypeDef *hi2c, uint8_t reg, uint8_t * val);
 
-uint8_t APDS9960_wireWriteDataBlock(I2C_HandleTypeDef *hi2c,  uint8_t reg,
-                                        uint8_t * val,
+uint8_t APDS9960_wireReadDataBlock( I2C_HandleTypeDef *hi2c,  uint8_t reg,
+                                        uint8_t *val,
                                         uint8_t len);
 
 uint8_t APDS9960_wireReadDataBlock( I2C_HandleTypeDef *hi2c,  uint8_t reg,

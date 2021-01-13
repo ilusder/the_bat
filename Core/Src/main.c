@@ -36,6 +36,7 @@
 /* USER CODE BEGIN Includes */
 #include "mlx90614_driver.h"
 #include "ssd1306.h"
+#include "apds9960.h"
 #include "fonts.h"
 #include <stdio.h>
 /* USER CODE END Includes */
@@ -158,6 +159,9 @@ int main(void)
   ssd1306_SetCursor(12, 12);
   ssd1306_WriteString("HELLO!", Font_11x18, White);
   ssd1306_UpdateScreen(&hi2c1);
+  
+  
+  //APDS9960_init(&hi2c1);
   /* USER CODE END 2 */
 
   /* Infinite loop */

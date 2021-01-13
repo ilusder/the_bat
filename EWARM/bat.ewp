@@ -357,6 +357,7 @@
                     <state>$PROJ_DIR$/../Drivers/CMSIS/Include</state>
                     <state>$PROJ_DIR$\..\Drivers\MLX90614</state>
                     <state>$PROJ_DIR$\..\Drivers\SSD1306</state>
+                    <state>$PROJ_DIR$\..\Drivers\APDS9960</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -1008,7 +1009,7 @@
                 </option>
                 <option>
                     <name>IlinkTrustzoneImportLibraryOut</name>
-                    <state>###Unitialized###</state>
+                    <state>bat_import_lib.o</state>
                 </option>
                 <option>
                     <name>OILinkExtraOption</name>
@@ -1071,6 +1072,9 @@
         <name>Drivers</name>
         <group>
             <name>APDS9960</name>
+            <file>
+                <name>$PROJ_DIR$\..\Drivers\APDS9960\apds9960.c</name>
+            </file>
             <file>
                 <name>$PROJ_DIR$\..\Drivers\APDS9960\apds9960.h</name>
             </file>
