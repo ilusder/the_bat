@@ -17,6 +17,19 @@
 #include "apds9960.h"
 
 
+
+/* Members */
+gesture_data_type gesture_data_;
+int gesture_ud_delta_;
+int gesture_lr_delta_;
+int gesture_ud_count_;
+int gesture_lr_count_;
+int gesture_near_count_;
+int gesture_far_count_;
+int gesture_state_;
+int gesture_motion_;
+
+
 /*******************************************************************************
  * Public methods for controlling the APDS-9960
  ******************************************************************************/
@@ -70,7 +83,45 @@ uint8_t APDS9960_setMode(I2C_HandleTypeDef *hi2c, uint8_t mode, uint8_t enable)
 }
 
 
+/**
+ * Turn the APDS-9960 on
+ *
+ * @return True if operation successful. False otherwise.
+ */
+uint8_t APDS9960_enablePower(I2C_HandleTypeDef *hi2c)
+{
+    if( !APDS9960_setMode(hi2c,POWER, 1) ) {
+        return HAL_ERROR;
+    }
 
+    return HAL_OK;
+}
+
+
+/*******************************************************************************
+ * High-level gesture controls
+ ******************************************************************************/
+
+/**
+ * @brief Resets all the parameters in the gesture data member
+ */
+void APDS9960_resetGestureParameters()
+{
+    gesture_data_.index = 0;
+    gesture_data_.total_gestures = 0;
+
+    gesture_ud_delta_ = 0;
+    gesture_lr_delta_ = 0;
+
+    gesture_ud_count_ = 0;
+    gesture_lr_count_ = 0;
+
+    gesture_near_count_ = 0;
+    gesture_far_count_ = 0;
+
+    gesture_state_ = 0;
+    gesture_motion_ = DIR_NONE;
+}
 
 /*******************************************************************************
  * Getters and setters for register values
@@ -1299,6 +1350,192 @@ uint8_t APDS9960_init(I2C_HandleTypeDef *hi2c)
 
     return HAL_OK;
 }
+
+
+
+
+/**
+ * @brief Starts the light (R/G/B/Ambient) sensor on the APDS-9960
+ *
+ * @param[in] interrupts HAL_OK to enable hardware interrupt on high or low light
+ * @return True if sensor enabled correctly. False on error.
+ */
+uint8_t APDS9960_enableLightSensor(I2C_HandleTypeDef *hi2c, uint8_t interrupts)
+{
+
+    /* Set default gain, interrupts, enable power, and enable sensor */
+    if( !APDS9960_setAmbientLightGain(hi2c, DEFAULT_AGAIN) ) {
+        return HAL_ERROR;
+    }
+    if( interrupts ) {
+        if( !APDS9960_setAmbientLightIntEnable(hi2c, 1) ) {
+            return HAL_ERROR;
+        }
+    } else {
+        if( !APDS9960_setAmbientLightIntEnable(hi2c, 0) ) {
+            return HAL_ERROR;
+        }
+    }
+    if( !APDS9960_enablePower(hi2c) ){
+        return HAL_ERROR;
+    }
+    if( !APDS9960_setMode(hi2c, AMBIENT_LIGHT, 1) ) {
+        return HAL_ERROR;
+    }
+
+    return HAL_OK;
+
+}
+
+/**
+ * @brief Ends the light sensor on the APDS-9960
+ *
+ * @return True if sensor disabled correctly. False on error.
+ */
+uint8_t APDS9960_disableLightSensor(I2C_HandleTypeDef *hi2c)
+{
+    if( !APDS9960_setAmbientLightIntEnable(hi2c, 0) ) {
+        return HAL_ERROR;
+    }
+    if( !APDS9960_setMode(hi2c, AMBIENT_LIGHT, 0) ) {
+        return HAL_ERROR;
+    }
+
+    return HAL_OK;
+}
+
+/**
+ * @brief Starts the proximity sensor on the APDS-9960
+ *
+ * @param[in] interrupts HAL_OK to enable hardware external interrupt on proximity
+ * @return True if sensor enabled correctly. False on error.
+ */
+uint8_t APDS9960_enableProximitySensor(I2C_HandleTypeDef *hi2c, uint8_t interrupts)
+{
+    /* Set default gain, LED, interrupts, enable power, and enable sensor */
+    if( !APDS9960_setProximityGain(hi2c, DEFAULT_PGAIN) ) {
+        return HAL_ERROR;
+    }
+    if( !APDS9960_setLEDDrive(hi2c, DEFAULT_LDRIVE) ) {
+        return HAL_ERROR;
+    }
+    if( interrupts ) {
+        if( !APDS9960_setProximityIntEnable(hi2c, 1) ) {
+            return HAL_ERROR;
+        }
+    } else {
+        if( !APDS9960_setProximityIntEnable(hi2c, 0) ) {
+            return HAL_ERROR;
+        }
+    }
+    if( !APDS9960_enablePower(hi2c) ){
+        return HAL_ERROR;
+    }
+    if( !APDS9960_setMode(hi2c, PROXIMITY, 1) ) {
+        return HAL_ERROR;
+    }
+
+    return HAL_OK;
+}
+
+/**
+ * @brief Ends the proximity sensor on the APDS-9960
+ *
+ * @return True if sensor disabled correctly. False on error.
+ */
+uint8_t APDS9960_disableProximitySensor(I2C_HandleTypeDef *hi2c)
+{
+	if( !APDS9960_setProximityIntEnable(hi2c, 0) ) {
+		return HAL_ERROR;
+	}
+	if( !APDS9960_setMode(hi2c, PROXIMITY, 0) ) {
+		return HAL_ERROR;
+	}
+
+	return HAL_OK;
+}
+
+/**
+ * @brief Starts the gesture recognition engine on the APDS-9960
+ *
+ * @param[in] interrupts HAL_OK to enable hardware external interrupt on gesture
+ * @return True if engine enabled correctly. False on error.
+ */
+uint8_t APDS9960_enableGestureSensor(I2C_HandleTypeDef *hi2c, uint8_t interrupts)
+{
+
+    /* Enable gesture mode
+       Set ENABLE to 0 (power off)
+       Set WTIME to 0xFF
+       Set AUX to LED_BOOST_300
+       Enable PON, WEN, PEN, GEN in ENABLE
+    */
+  
+   uint8_t value;
+   
+    APDS9960_resetGestureParameters();
+    value = 0xFF;
+    
+    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_WTIME, &value) ) {
+        return HAL_ERROR;
+    }
+    
+    value = DEFAULT_GESTURE_PPULSE;
+    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_PPULSE, &value) ) {
+        return HAL_ERROR;
+    }
+    if( !APDS9960_setLEDBoost(hi2c, LED_BOOST_300) ) {
+        return HAL_ERROR;
+    }
+    if( interrupts ) {
+        if( !APDS9960_setGestureIntEnable(hi2c, 1) ) {
+            return HAL_ERROR;
+        }
+    } else {
+        if( !APDS9960_setGestureIntEnable(hi2c, 0) ) {
+            return HAL_ERROR;
+        }
+    }
+    if( !APDS9960_setGestureMode(hi2c, 1) ) {
+        return HAL_ERROR;
+    }
+    if( !APDS9960_enablePower(hi2c) ){
+        return HAL_ERROR;
+    }
+    if( !APDS9960_setMode(hi2c, WAIT, 1) ) {
+        return HAL_ERROR;
+    }
+    if( !APDS9960_setMode(hi2c, PROXIMITY, 1) ) {
+        return HAL_ERROR;
+    }
+    if( !APDS9960_setMode(hi2c, GESTURE, 1) ) {
+        return HAL_ERROR;
+    }
+
+    return HAL_OK;
+}
+
+/**
+ * @brief Ends the gesture recognition engine on the APDS-9960
+ *
+ * @return True if engine disabled correctly. False on error.
+ */
+uint8_t APDS9960_disableGestureSensor(I2C_HandleTypeDef *hi2c)
+{
+    APDS9960_resetGestureParameters();
+    if( !APDS9960_setGestureIntEnable(hi2c, 0) ) {
+        return HAL_ERROR;
+    }
+    if( !APDS9960_setGestureMode(hi2c, 0) ) {
+        return HAL_ERROR;
+    }
+    if( !APDS9960_setMode(hi2c, GESTURE, 0) ) {
+        return HAL_ERROR;
+    }
+
+    return HAL_OK;
+}
+
 
 
 /*******************************************************************************
