@@ -49,5 +49,5 @@ Backup*
 
 # IAR .dep files
 *.dep
-
+*.pbw
 # End of https://www.toptal.com/developers/gitignore/api/iar
