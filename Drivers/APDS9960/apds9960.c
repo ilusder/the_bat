@@ -97,6 +97,20 @@ uint8_t APDS9960_enablePower(I2C_HandleTypeDef *hi2c)
     return HAL_OK;
 }
 
+/**
+ * Turn the APDS-9960 off
+ *
+ * @return True if operation successful. False otherwise.
+ */
+uint8_t APDS9960_disablePower(I2C_HandleTypeDef *hi2c)
+{
+    if( !APDS9960_setMode(hi2c, POWER, 0) ) {
+        return HAL_ERROR;
+    }
+
+    return HAL_OK;
+}
+
 
 /*******************************************************************************
  * High-level gesture controls
@@ -1345,6 +1359,138 @@ uint8_t APDS9960_init(I2C_HandleTypeDef *hi2c)
         return HAL_ERROR;
     }
     if( !APDS9960_setGestureIntEnable(hi2c, DEFAULT_GIEN) ) {
+        return HAL_ERROR;
+    }
+
+    return HAL_OK;
+}
+
+
+
+/*******************************************************************************
+ * Ambient light and color sensor controls
+ ******************************************************************************/
+
+/**
+ * @brief Reads the ambient (clear) light level as a 16-bit value
+ *
+ * @param[out] val value of the light sensor.
+ * @return True if operation successful. False otherwise.
+ */
+uint8_t APDS9960_readAmbientLight(I2C_HandleTypeDef *hi2c, uint16_t * val)
+{
+    uint8_t val_byte;
+    *val = 0;
+
+    /* Read value from clear channel, low byte register */
+    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_CDATAL, &val_byte) ) {
+        return HAL_ERROR;
+    }
+    *val = val_byte;
+
+    /* Read value from clear channel, high byte register */
+    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_CDATAH, &val_byte) ) {
+        return HAL_ERROR;
+    }
+    *val = *val + ((uint16_t)val_byte << 8);
+
+    return HAL_OK;
+}
+
+/**
+ * @brief Reads the red light level as a 16-bit value
+ *
+ * @param[out] val value of the light sensor.
+ * @return True if operation successful. False otherwise.
+ */
+uint8_t APDS9960_readRedLight(I2C_HandleTypeDef *hi2c, uint16_t * val)
+{
+    uint8_t val_byte;
+    *val = 0;
+
+    /* Read value from clear channel, low byte register */
+    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_RDATAL, &val_byte) ) {
+        return HAL_ERROR;
+    }
+    *val = val_byte;
+
+    /* Read value from clear channel, high byte register */
+    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_RDATAH, &val_byte) ) {
+        return HAL_ERROR;
+    }
+    *val = *val + ((uint16_t)val_byte << 8);
+
+    return HAL_OK;
+}
+
+/**
+ * @brief Reads the green light level as a 16-bit value
+ *
+ * @param[out] val value of the light sensor.
+ * @return True if operation successful. False otherwise.
+ */
+uint8_t APDS9960_readGreenLight(I2C_HandleTypeDef *hi2c, uint16_t * val)
+{
+    uint8_t val_byte;
+    *val = 0;
+
+    /* Read value from clear channel, low byte register */
+    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_GDATAL, &val_byte) ) {
+        return HAL_ERROR;
+    }
+    *val = val_byte;
+
+    /* Read value from clear channel, high byte register */
+    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_GDATAH, &val_byte) ) {
+        return HAL_ERROR;
+    }
+    *val = *val + ((uint16_t)val_byte << 8);
+
+    return HAL_OK;
+}
+
+/**
+ * @brief Reads the red light level as a 16-bit value
+ *
+ * @param[out] val value of the light sensor.
+ * @return True if operation successful. False otherwise.
+ */
+uint8_t APDS9960_readBlueLight(I2C_HandleTypeDef *hi2c, uint16_t * val)
+{
+    uint8_t val_byte;
+    *val = 0;
+
+    /* Read value from clear channel, low byte register */
+    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_BDATAL, &val_byte) ) {
+        return HAL_ERROR;
+    }
+    *val = val_byte;
+
+    /* Read value from clear channel, high byte register */
+    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_BDATAH, &val_byte) ) {
+        return HAL_ERROR;
+    }
+    *val = *val + ((uint16_t)val_byte << 8);
+
+    return HAL_OK;
+}
+
+/*******************************************************************************
+ * Proximity sensor controls
+ ******************************************************************************/
+
+/**
+ * @brief Reads the proximity level as an 8-bit value
+ *
+ * @param[out] val value of the proximity sensor.
+ * @return True if operation successful. False otherwise.
+ */
+uint8_t APDS9960_readProximity(I2C_HandleTypeDef *hi2c, uint8_t * val)
+{
+    *val = 0;
+
+    /* Read value from proximity data register */
+    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_PDATA, val) ) {
         return HAL_ERROR;
     }
 

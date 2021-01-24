@@ -217,13 +217,41 @@ typedef struct gesture_data_type {
 
 
 
+uint8_t APDS9960_enablePower(I2C_HandleTypeDef *hi2c);
 
+uint8_t APDS9960_disablePower(I2C_HandleTypeDef *hi2c);
 
 uint8_t APDS9960_init(I2C_HandleTypeDef *hi2c);
 
 uint8_t APDS9960_setMode(I2C_HandleTypeDef *hi2c, uint8_t mode, uint8_t enable);
 
 uint8_t APDS9960_getMode(I2C_HandleTypeDef *hi2c);
+
+uint8_t APDS9960_enableLightSensor(I2C_HandleTypeDef *hi2c, uint8_t interrupts);
+
+uint8_t APDS9960_readAmbientLight(I2C_HandleTypeDef *hi2c, uint16_t * val);
+
+uint8_t APDS9960_readProximity(I2C_HandleTypeDef *hi2c, uint8_t * val);
+
+uint8_t APDS9960_readRedLight(I2C_HandleTypeDef *hi2c, uint16_t * val);
+
+uint8_t APDS9960_readGreenLight(I2C_HandleTypeDef *hi2c, uint16_t * val);
+
+uint8_t APDS9960_readBlueLight(I2C_HandleTypeDef *hi2c, uint16_t * val);
+
+
+
+uint8_t APDS9960_disableLightSensor(I2C_HandleTypeDef *hi2c);
+
+uint8_t APDS9960_enableProximitySensor(I2C_HandleTypeDef *hi2c, uint8_t interrupts);
+
+uint8_t APDS9960_disableProximitySensor(I2C_HandleTypeDef *hi2c);
+
+uint8_t APDS9960_enableGestureSensor(I2C_HandleTypeDef *hi2c, uint8_t interrupts);
+
+uint8_t APDS9960_disableGestureSensor(I2C_HandleTypeDef *hi2c);
+
+
 
 
 uint8_t APDS9960_wireWriteDataByte(I2C_HandleTypeDef *hi2c, uint8_t reg, uint8_t * val);

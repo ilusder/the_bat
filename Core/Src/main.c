@@ -118,6 +118,7 @@ int main(void)
   /* USER CODE BEGIN 1 */
   float temp;
   char string_disp[11];
+  uint8_t prox_data;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -160,14 +161,19 @@ int main(void)
   ssd1306_WriteString("HELLO!", Font_11x18, White);
   ssd1306_UpdateScreen(&hi2c1);
   
-  
   APDS9960_init(&hi2c1);
+  APDS9960_enableProximitySensor(&hi2c1, 0);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+     //APDS9960_readProximity(&hi2c1, &prox_data);
+     //sprintf(string_disp, "p: %d", prox_data);
+     //ssd1306_SetCursor(2, 2);
+     //ssd1306_WriteString(string_disp, Font_16x26, White);
+     //ssd1306_UpdateScreen(&hi2c1);
      mlx90614GetObjectTemp(&hi2c1, &temp);
      ssd1306_SetCursor(2, 2);
      sprintf(string_disp, "t: %.2f", temp);
