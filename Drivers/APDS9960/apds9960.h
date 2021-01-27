@@ -225,7 +225,9 @@ uint8_t APDS9960_init(I2C_HandleTypeDef *hi2c);
 
 uint8_t APDS9960_setMode(I2C_HandleTypeDef *hi2c, uint8_t mode, uint8_t enable);
 
-uint8_t APDS9960_getMode(I2C_HandleTypeDef *hi2c);
+uint8_t APDS9960_setProximityGain(I2C_HandleTypeDef *hi2c, uint8_t drive);
+
+uint8_t APDS9960_getMode(I2C_HandleTypeDef *hi2c, uint8_t * mode);
 
 uint8_t APDS9960_enableLightSensor(I2C_HandleTypeDef *hi2c, uint8_t interrupts);
 

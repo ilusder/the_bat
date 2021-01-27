@@ -35,26 +35,21 @@ int gesture_motion_;
  ******************************************************************************/
 
 
-uint8_t APDS9960_getMode(I2C_HandleTypeDef *hi2c)
+uint8_t APDS9960_getMode(I2C_HandleTypeDef *hi2c, uint8_t * mode)
 {
-    uint8_t enable_value;
-
     /* Read current ENABLE register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_ENABLE, &enable_value) ) {
-        return HAL_ERROR;
-    }
-
-    return enable_value;
+    return APDS9960_wireReadDataByte(hi2c, APDS9960_ENABLE, mode);
 }
 
 
 uint8_t APDS9960_setMode(I2C_HandleTypeDef *hi2c, uint8_t mode, uint8_t enable)
 {
     uint8_t reg_val;
+    uint8_t result;
 
     /* Read current ENABLE register */
-    reg_val = APDS9960_getMode(hi2c);
-    if( reg_val == HAL_ERROR ) {
+    result = APDS9960_getMode(hi2c, &reg_val);
+    if( result == HAL_ERROR ) {
         return HAL_ERROR;
     }
 
@@ -75,10 +70,10 @@ uint8_t APDS9960_setMode(I2C_HandleTypeDef *hi2c, uint8_t mode, uint8_t enable)
     }
 
     /* Write value back to ENABLE register */
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_ENABLE, &reg_val) ) {
+    result =  APDS9960_wireWriteDataByte(hi2c, APDS9960_ENABLE, &reg_val);
+    if( result == HAL_ERROR ) {
         return HAL_ERROR;
     }
-
     return HAL_OK;
 }
 
@@ -166,7 +161,8 @@ uint8_t APDS9960_getProxIntLowThresh(I2C_HandleTypeDef *hi2c)
  */
 uint8_t APDS9960_setProxIntLowThresh(I2C_HandleTypeDef *hi2c, uint8_t threshold)
 {
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_PILT, &threshold) ) {
+    if( HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_PILT, &threshold) ) 
+    {
         return HAL_ERROR;
     }
 
@@ -183,8 +179,9 @@ uint8_t APDS9960_getProxIntHighThresh(I2C_HandleTypeDef *hi2c)
     uint8_t val;
 
     /* Read value from PIHT register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_PIHT, &val) ) {
-        val = 0;
+    if( HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_PIHT, &val) ) 
+    {
+        return HAL_ERROR;
     }
 
     return val;
@@ -198,7 +195,8 @@ uint8_t APDS9960_getProxIntHighThresh(I2C_HandleTypeDef *hi2c)
  */
 uint8_t APDS9960_setProxIntHighThresh(I2C_HandleTypeDef *hi2c, uint8_t threshold)
 {
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_PIHT, &threshold) ) {
+    if( HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_PIHT, &threshold) ) 
+    {
         return HAL_ERROR;
     }
 
@@ -221,7 +219,8 @@ uint8_t APDS9960_getLEDDrive(I2C_HandleTypeDef *hi2c)
     uint8_t val;
 
     /* Read value from CONTROL register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_CONTROL, &val) ) {
+    if( HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_CONTROL, &val) ) 
+    {
         return HAL_ERROR;
     }
 
@@ -249,7 +248,8 @@ uint8_t APDS9960_setLEDDrive(I2C_HandleTypeDef *hi2c, uint8_t drive)
     uint8_t val;
 
     /* Read value from CONTROL register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_CONTROL, &val) ) {
+    if(HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_CONTROL, &val) ) 
+    {
         return HAL_ERROR;
     }
 
@@ -260,7 +260,8 @@ uint8_t APDS9960_setLEDDrive(I2C_HandleTypeDef *hi2c, uint8_t drive)
     val |= drive;
 
     /* Write register value back into CONTROL register */
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_CONTROL, &val) ) {
+    if(HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_CONTROL, &val) ) 
+    {
         return HAL_ERROR;
     }
 
@@ -283,14 +284,15 @@ uint8_t APDS9960_getProximityGain(I2C_HandleTypeDef *hi2c)
     uint8_t val;
 
     /* Read value from CONTROL register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_CONTROL, &val) ) {
+    if( HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_CONTROL, &val) )
+    {
         return HAL_ERROR;
     }
 
     /* Shift and mask out PDRIVE bits */
     val = (val >> 2) & 0x03;
 
-    return val;
+    return HAL_OK;
 }
 
 /**
@@ -310,7 +312,8 @@ uint8_t APDS9960_setProximityGain(I2C_HandleTypeDef *hi2c, uint8_t drive)
     uint8_t val;
 
     /* Read value from CONTROL register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_CONTROL, &val) ) {
+    if(HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_CONTROL, &val) ) 
+    {
         return HAL_ERROR;
     }
 
@@ -321,11 +324,12 @@ uint8_t APDS9960_setProximityGain(I2C_HandleTypeDef *hi2c, uint8_t drive)
     val |= drive;
 
     /* Write register value back into CONTROL register */
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_CONTROL, &val) ) {
+    if(HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_CONTROL, &val) ) 
+    {
         return HAL_ERROR;
     }
 
-    return HAL_OK;
+    return val;
 }
 
 /**
@@ -344,7 +348,8 @@ uint8_t APDS9960_getAmbientLightGain(I2C_HandleTypeDef *hi2c)
     uint8_t val;
 
     /* Read value from CONTROL register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_CONTROL, &val) ) {
+    if(HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_CONTROL, &val) ) 
+    {
         return HAL_ERROR;
     }
 
@@ -371,7 +376,8 @@ uint8_t APDS9960_setAmbientLightGain(I2C_HandleTypeDef *hi2c, uint8_t drive)
     uint8_t val;
 
     /* Read value from CONTROL register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_CONTROL, &val) ) {
+    if(HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_CONTROL, &val) ) 
+    {
         return HAL_ERROR;
     }
 
@@ -381,7 +387,8 @@ uint8_t APDS9960_setAmbientLightGain(I2C_HandleTypeDef *hi2c, uint8_t drive)
     val |= drive;
 
     /* Write register value back into CONTROL register */
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_CONTROL, &val) ) {
+    if(HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_CONTROL, &val) ) 
+    {
         return HAL_ERROR;
     }
 
@@ -404,8 +411,9 @@ uint8_t APDS9960_getLEDBoost(I2C_HandleTypeDef *hi2c)
     uint8_t val;
 
     /* Read value from CONFIG2 register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_CONFIG2, &val) ) {
-        return ERROR;
+    if(HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_CONFIG2, &val) ) 
+    {
+        return HAL_ERROR;
     }
 
     /* Shift and mask out LED_BOOST bits */
@@ -431,7 +439,8 @@ uint8_t APDS9960_setLEDBoost(I2C_HandleTypeDef *hi2c, uint8_t boost)
     uint8_t val;
 
     /* Read value from CONFIG2 register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_CONFIG2, &val) ) {
+    if(HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_CONFIG2, &val) )
+    {
         return HAL_ERROR;
     }
 
@@ -442,7 +451,8 @@ uint8_t APDS9960_setLEDBoost(I2C_HandleTypeDef *hi2c, uint8_t boost)
     val |= boost;
 
     /* Write register value back into CONFIG2 register */
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_CONFIG2, &val) ) {
+    if(HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_CONFIG2, &val) ) 
+    {
         return HAL_ERROR;
     }
 
@@ -459,8 +469,9 @@ uint8_t APDS9960_getProxGainCompEnable(I2C_HandleTypeDef *hi2c)
     uint8_t val;
 
     /* Read value from CONFIG3 register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_CONFIG3, &val) ) {
-        return ERROR;
+    if(HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_CONFIG3, &val) ) 
+    {
+        return HAL_ERROR;
     }
 
     /* Shift and mask out PCMP bits */
@@ -480,7 +491,8 @@ uint8_t APDS9960_getProxGainCompEnable(I2C_HandleTypeDef *hi2c)
     uint8_t val;
 
     /* Read value from CONFIG3 register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_CONFIG3, &val) ) {
+    if(HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_CONFIG3, &val) ) 
+    {
         return HAL_ERROR;
     }
 
@@ -491,7 +503,8 @@ uint8_t APDS9960_getProxGainCompEnable(I2C_HandleTypeDef *hi2c)
     val |= enable;
 
     /* Write register value back into CONFIG3 register */
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_CONFIG3, &val) ) {
+    if(HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_CONFIG3, &val) ) 
+    {
         return HAL_ERROR;
     }
 
@@ -515,7 +528,8 @@ uint8_t APDS9960_getProxPhotoMask(I2C_HandleTypeDef *hi2c)
     uint8_t val;
 
     /* Read value from CONFIG3 register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_CONFIG3, &val) ) {
+    if(HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_CONFIG3, &val) )
+    {
         return HAL_ERROR;
     }
 
@@ -543,7 +557,8 @@ uint8_t APDS9960_setProxPhotoMask(I2C_HandleTypeDef *hi2c, uint8_t mask)
     uint8_t val;
 
     /* Read value from CONFIG3 register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_CONFIG3, &val) ) {
+    if(HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_CONFIG3, &val) ) 
+    {
         return HAL_ERROR;
     }
 
@@ -553,7 +568,8 @@ uint8_t APDS9960_setProxPhotoMask(I2C_HandleTypeDef *hi2c, uint8_t mask)
     val |= mask;
 
     /* Write register value back into CONFIG3 register */
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_CONFIG3, &val) ) {
+    if(HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_CONFIG3, &val) )
+    {
         return HAL_ERROR;
     }
 
@@ -570,8 +586,9 @@ uint8_t APDS9960_getGestureEnterThresh(I2C_HandleTypeDef *hi2c)
     uint8_t val;
 
     /* Read value from GPENTH register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_GPENTH, &val) ) {
-        val = 0;
+    if(HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_GPENTH, &val) ) 
+    {
+        return HAL_ERROR;
     }
 
     return val;
@@ -585,7 +602,8 @@ uint8_t APDS9960_getGestureEnterThresh(I2C_HandleTypeDef *hi2c)
  */
 uint8_t APDS9960_setGestureEnterThresh(I2C_HandleTypeDef *hi2c, uint8_t threshold)
 {
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_GPENTH, &threshold) ) {
+    if( HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_GPENTH, &threshold) ) 
+    {
         return HAL_ERROR;
     }
 
@@ -597,16 +615,15 @@ uint8_t APDS9960_setGestureEnterThresh(I2C_HandleTypeDef *hi2c, uint8_t threshol
  *
  * @return Current exit proximity threshold.
  */
-uint8_t APDS9960_getGestureExitThresh(I2C_HandleTypeDef *hi2c)
+uint8_t APDS9960_getGestureExitThresh(I2C_HandleTypeDef *hi2c, uint8_t * threshold)
 {
-    uint8_t val;
-
     /* Read value from GEXTH register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_GEXTH, &val) ) {
-        val = 0;
+    if( HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_GEXTH, threshold) ) 
+    {
+         return HAL_ERROR;
     }
 
-    return val;
+    return HAL_OK;
 }
 
 /**
@@ -615,9 +632,10 @@ uint8_t APDS9960_getGestureExitThresh(I2C_HandleTypeDef *hi2c)
  * @param[in] threshold proximity value needed to end gesture mode
  * @return True if operation successful. False otherwise.
  */
-uint8_t APDS9960_setGestureExitThresh(I2C_HandleTypeDef *hi2c, uint8_t threshold)
+uint8_t APDS9960_setGestureExitThresh(I2C_HandleTypeDef *hi2c, uint8_t * threshold)
 {
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_GEXTH, &threshold) ) {
+    if(  HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_GEXTH, threshold) ) 
+    {
         return HAL_ERROR;
     }
 
@@ -640,7 +658,8 @@ uint8_t APDS9960_getGestureGain(I2C_HandleTypeDef *hi2c)
     uint8_t val;
 
     /* Read value from GCONF2 register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_GCONF2, &val) ) {
+    if( HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_GCONF2, &val) )
+    {
         return HAL_ERROR;
     }
 
@@ -667,7 +686,8 @@ uint8_t APDS9960_setGestureGain(I2C_HandleTypeDef *hi2c, uint8_t gain)
     uint8_t val;
 
     /* Read value from GCONF2 register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_GCONF2, &val) ) {
+    if(HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_GCONF2, &val) )
+    {
         return HAL_ERROR;
     }
 
@@ -678,7 +698,8 @@ uint8_t APDS9960_setGestureGain(I2C_HandleTypeDef *hi2c, uint8_t gain)
     val |= gain;
 
     /* Write register value back into GCONF2 register */
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_GCONF2, &val) ) {
+    if( HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_GCONF2, &val) ) 
+    {
         return HAL_ERROR;
     }
 
@@ -701,7 +722,8 @@ uint8_t APDS9960_getGestureLEDDrive(I2C_HandleTypeDef *hi2c)
     uint8_t val;
 
     /* Read value from GCONF2 register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_GCONF2, &val) ) {
+    if( HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_GCONF2, &val) ) 
+    {
         return ERROR;
     }
 
@@ -728,7 +750,8 @@ uint8_t APDS9960_setGestureLEDDrive(I2C_HandleTypeDef *hi2c, uint8_t drive)
     uint8_t val;
 
     /* Read value from GCONF2 register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_GCONF2, &val) ) {
+    if( HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_GCONF2, &val) ) 
+    {
         return HAL_ERROR;
     }
 
@@ -739,7 +762,8 @@ uint8_t APDS9960_setGestureLEDDrive(I2C_HandleTypeDef *hi2c, uint8_t drive)
     val |= drive;
 
     /* Write register value back into GCONF2 register */
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_GCONF2, &val) ) {
+    if( HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_GCONF2, &val) ) 
+    {
         return HAL_ERROR;
     }
 
@@ -766,7 +790,8 @@ uint8_t APDS9960_getGestureWaitTime(I2C_HandleTypeDef *hi2c)
     uint8_t val;
 
     /* Read value from GCONF2 register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_GCONF2, &val) ) {
+    if( HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_GCONF2, &val) )
+    {
         return ERROR;
     }
 
@@ -797,7 +822,8 @@ uint8_t APDS9960_setGestureWaitTime(I2C_HandleTypeDef *hi2c, uint8_t time)
     uint8_t val;
 
     /* Read value from GCONF2 register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_GCONF2, &val) ) {
+    if( HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_GCONF2, &val) ) 
+    {
         return HAL_ERROR;
     }
 
@@ -807,7 +833,8 @@ uint8_t APDS9960_setGestureWaitTime(I2C_HandleTypeDef *hi2c, uint8_t time)
     val |= time;
 
     /* Write register value back into GCONF2 register */
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_GCONF2, &val) ) {
+    if( HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_GCONF2, &val) )
+    {
         return HAL_ERROR;
     }
 
@@ -826,13 +853,15 @@ uint8_t APDS9960_getLightIntLowThreshold(I2C_HandleTypeDef *hi2c, uint16_t thres
     threshold = 0;
 
     /* Read value from ambient light low threshold, low byte register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_AILTL, &val_byte) ) {
+    if( HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_AILTL, &val_byte) ) 
+    {
         return HAL_ERROR;
     }
     threshold = val_byte;
 
     /* Read value from ambient light low threshold, high byte register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_AILTH, &val_byte) ) {
+    if( HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_AILTH, &val_byte) )
+    {
         return HAL_ERROR;
     }
     threshold = threshold + ((uint16_t)val_byte << 8);
@@ -856,12 +885,14 @@ uint8_t APDS9960_setLightIntLowThreshold(I2C_HandleTypeDef *hi2c, uint16_t thres
     val_high = (threshold & 0xFF00) >> 8;
 
     /* Write low byte */
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_AILTL, &val_low) ) {
+    if( HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_AILTL, &val_low) )
+    {
         return HAL_ERROR;
     }
 
     /* Write high byte */
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_AILTH, &val_high) ) {
+    if( HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_AILTH, &val_high) )
+    {
         return HAL_ERROR;
     }
 
@@ -880,13 +911,15 @@ uint8_t APDS9960_getLightIntHighThreshold(I2C_HandleTypeDef *hi2c, uint16_t thre
     threshold = 0;
 
     /* Read value from ambient light high threshold, low byte register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_AIHTL, &val_byte) ) {
+    if( HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_AIHTL, &val_byte) )
+    {
         return HAL_ERROR;
     }
     threshold = val_byte;
 
     /* Read value from ambient light high threshold, high byte register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_AIHTH, &val_byte) ) {
+    if( HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_AIHTH, &val_byte) )
+    {
         return HAL_ERROR;
     }
     threshold = threshold + ((uint16_t)val_byte << 8);
@@ -910,16 +943,14 @@ uint8_t APDS9960_setLightIntHighThreshold(I2C_HandleTypeDef *hi2c, uint16_t thre
     val_high = (threshold & 0xFF00) >> 8;
 
     /* Write low byte */
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_AIHTL, &val_low) ) {
+    if( HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_AIHTL, &val_low) ) 
+    {
         return HAL_ERROR;
     }
 
     /* Write high byte */
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_AIHTH, &val_high) ) {
-        return HAL_ERROR;
-    }
+    return APDS9960_wireWriteDataByte(hi2c, APDS9960_AIHTH, &val_high);
 
-    return HAL_OK;
 }
 
 /**
@@ -933,11 +964,7 @@ uint8_t APDS9960_getProximityIntLowThreshold(I2C_HandleTypeDef *hi2c, uint8_t th
     threshold = 0;
 
     /* Read value from proximity low threshold register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_PILT, &threshold) ) {
-        return HAL_ERROR;
-    }
-
-    return HAL_OK;
+    return APDS9960_wireReadDataByte(hi2c, APDS9960_PILT, &threshold);
 }
 
 /**
@@ -950,11 +977,7 @@ uint8_t APDS9960_setProximityIntLowThreshold(I2C_HandleTypeDef *hi2c, uint8_t th
 {
 
     /* Write threshold value to register */
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_PILT, &threshold) ) {
-        return HAL_ERROR;
-    }
-
-    return HAL_OK;
+    return APDS9960_wireWriteDataByte(hi2c, APDS9960_PILT, &threshold);
 }
 
 /**
@@ -968,11 +991,7 @@ uint8_t APDS9960_getProximityIntHighThreshold(I2C_HandleTypeDef *hi2c, uint8_t t
     threshold = 0;
 
     /* Read value from proximity low threshold register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_PIHT, &threshold) ) {
-        return HAL_ERROR;
-    }
-
-    return HAL_OK;
+    return APDS9960_wireReadDataByte(hi2c, APDS9960_PIHT, &threshold);
 }
 
 /**
@@ -985,11 +1004,7 @@ uint8_t APDS9960_setProximityIntHighThreshold(I2C_HandleTypeDef *hi2c, uint8_t t
 {
 
     /* Write threshold value to register */
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_PIHT, &threshold) ) {
-        return HAL_ERROR;
-    }
-
-    return HAL_OK;
+    return APDS9960_wireWriteDataByte(hi2c, APDS9960_PIHT, &threshold) ;
 }
 
 /**
@@ -1002,7 +1017,8 @@ uint8_t APDS9960_getAmbientLightIntEnable(I2C_HandleTypeDef *hi2c)
     uint8_t val;
 
     /* Read value from ENABLE register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_ENABLE, &val) ) {
+    if( HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_ENABLE, &val) ) 
+    {
         return ERROR;
     }
 
@@ -1023,7 +1039,8 @@ uint8_t APDS9960_setAmbientLightIntEnable(I2C_HandleTypeDef *hi2c, uint8_t enabl
     uint8_t val;
 
     /* Read value from ENABLE register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_ENABLE, &val) ) {
+    if( HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_ENABLE, &val) ) 
+    {
         return HAL_ERROR;
     }
 
@@ -1034,11 +1051,7 @@ uint8_t APDS9960_setAmbientLightIntEnable(I2C_HandleTypeDef *hi2c, uint8_t enabl
     val |= enable;
 
     /* Write register value back into ENABLE register */
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_ENABLE, &val) ) {
-        return HAL_ERROR;
-    }
-
-    return HAL_OK;
+    return APDS9960_wireWriteDataByte(hi2c, APDS9960_ENABLE, &val);
 }
 
 /**
@@ -1051,7 +1064,8 @@ uint8_t APDS9960_getProximityIntEnable(I2C_HandleTypeDef *hi2c)
     uint8_t val;
 
     /* Read value from ENABLE register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_ENABLE, &val) ) {
+    if( HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_ENABLE, &val) )
+    {
         return ERROR;
     }
 
@@ -1072,7 +1086,8 @@ uint8_t APDS9960_setProximityIntEnable(I2C_HandleTypeDef *hi2c, uint8_t enable)
     uint8_t val;
 
     /* Read value from ENABLE register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_ENABLE, &val) ) {
+    if( HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_ENABLE, &val) ) 
+    {
         return HAL_ERROR;
     }
 
@@ -1083,11 +1098,7 @@ uint8_t APDS9960_setProximityIntEnable(I2C_HandleTypeDef *hi2c, uint8_t enable)
     val |= enable;
 
     /* Write register value back into ENABLE register */
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_ENABLE, &val) ) {
-        return HAL_ERROR;
-    }
-
-    return HAL_OK;
+    return APDS9960_wireWriteDataByte(hi2c, APDS9960_ENABLE, &val);
 }
 
 /**
@@ -1100,8 +1111,9 @@ uint8_t APDS9960_getGestureIntEnable(I2C_HandleTypeDef *hi2c)
     uint8_t val;
 
     /* Read value from GCONF4 register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_GCONF4, &val) ) {
-        return ERROR;
+    if(HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_GCONF4, &val) ) 
+    {
+        return HAL_ERROR;
     }
 
     /* Shift and mask out GIEN bit */
@@ -1121,7 +1133,8 @@ uint8_t APDS9960_setGestureIntEnable(I2C_HandleTypeDef *hi2c, uint8_t enable)
     uint8_t val;
 
     /* Read value from GCONF4 register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_GCONF4, &val) ) {
+    if( HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_GCONF4, &val) ) 
+    {
         return HAL_ERROR;
     }
 
@@ -1132,11 +1145,7 @@ uint8_t APDS9960_setGestureIntEnable(I2C_HandleTypeDef *hi2c, uint8_t enable)
     val |= enable;
 
     /* Write register value back into GCONF4 register */
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_GCONF4, &val) ) {
-        return HAL_ERROR;
-    }
-
-    return HAL_OK;
+    return APDS9960_wireWriteDataByte(hi2c, APDS9960_GCONF4, &val);
 }
 
 /**
@@ -1146,12 +1155,8 @@ uint8_t APDS9960_setGestureIntEnable(I2C_HandleTypeDef *hi2c, uint8_t enable)
  */
 uint8_t APDS9960_clearAmbientLightInt(I2C_HandleTypeDef *hi2c)
 {
-    uint8_t throwaway;
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_AICLEAR, &throwaway) ) {
-        return HAL_ERROR;
-    }
-
-    return HAL_OK;
+    uint8_t throwaway = 0;
+    return APDS9960_wireReadDataByte(hi2c, APDS9960_AICLEAR, &throwaway);
 }
 
 /**
@@ -1161,12 +1166,8 @@ uint8_t APDS9960_clearAmbientLightInt(I2C_HandleTypeDef *hi2c)
  */
 uint8_t APDS9960_clearProximityInt(I2C_HandleTypeDef *hi2c)
 {
-    uint8_t throwaway;
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_PICLEAR, &throwaway) ) {
-        return HAL_ERROR;
-    }
-
-    return HAL_OK;
+    uint8_t throwaway = 0;
+    return APDS9960_wireReadDataByte(hi2c, APDS9960_PICLEAR, &throwaway);
 }
 
 /**
@@ -1179,7 +1180,8 @@ uint8_t APDS9960_getGestureMode(I2C_HandleTypeDef *hi2c)
     uint8_t val;
 
     /* Read value from GCONF4 register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_GCONF4, &val) ) {
+    if( HAL_ERROR ==APDS9960_wireReadDataByte(hi2c, APDS9960_GCONF4, &val) )
+    {
         return HAL_ERROR;
     }
 
@@ -1200,7 +1202,8 @@ uint8_t APDS9960_setGestureMode(I2C_HandleTypeDef *hi2c, uint8_t mode)
     uint8_t val;
 
     /* Read value from GCONF4 register */
-    if( !APDS9960_wireReadDataByte(hi2c, APDS9960_GCONF4, &val) ) {
+    if( HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_GCONF4, &val) )
+    {
         return HAL_ERROR;
     }
 
@@ -1210,11 +1213,7 @@ uint8_t APDS9960_setGestureMode(I2C_HandleTypeDef *hi2c, uint8_t mode)
     val |= mode;
 
     /* Write register value back into GCONF4 register */
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_GCONF4, &val) ) {
-        return HAL_ERROR;
-    }
-
-    return HAL_OK;
+    return APDS9960_wireWriteDataByte(hi2c, APDS9960_GCONF4, &val);
 }
 
 
@@ -1231,11 +1230,9 @@ uint8_t APDS9960_init(I2C_HandleTypeDef *hi2c)
 {
     
     uint8_t id;
-    uint8_t result;
 
     /* Read ID register and check against known values for APDS-9960 */
-    result = APDS9960_wireReadDataByte(hi2c, APDS9960_ID, &id);
-    if (HAL_ERROR == result)
+    if (HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_ID, &id))
     {
         return HAL_ERROR;
     }
@@ -1244,122 +1241,148 @@ uint8_t APDS9960_init(I2C_HandleTypeDef *hi2c)
     }
 
     /* Set ENABLE register to 0 (disable all features) */
-    if( !APDS9960_setMode(hi2c, ALL, OFF) ) {
+    if (HAL_ERROR == APDS9960_setMode(hi2c, ALL, OFF))
+    {
         return HAL_ERROR;
     }
     id = DEFAULT_ATIME;
     /* Set default values for ambient light and proximity registers */
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_ATIME, &id) ) {
+    if (HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_ATIME, &id))
+    {
         return HAL_ERROR;
     }
     id = DEFAULT_WTIME;
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_WTIME, &id) ) {
+    if (HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_WTIME, &id))
+    {
+        return HAL_ERROR;
+    }
+    id = DEFAULT_PROX_PPULSE;
+    if (HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_PPULSE, &id))
+    {
+        return HAL_ERROR;
+    }
+    id = DEFAULT_POFFSET_UR;
+    if (HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_POFFSET_UR, &id))
+    {
+        return HAL_ERROR;
+    }
+    id = DEFAULT_POFFSET_DL;
+    if (HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_POFFSET_DL, &id))
+    {
+      return HAL_ERROR;
+    }
+    id = DEFAULT_CONFIG1;
+    if (HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_CONFIG1, &id))
+    {
       return HAL_ERROR;
     }
     
-    id = DEFAULT_PROX_PPULSE;
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_PPULSE, &id) ) {
-        return HAL_ERROR;
+    if (HAL_ERROR == APDS9960_setLEDDrive(hi2c, DEFAULT_LDRIVE))
+    {
+      return HAL_ERROR;
     }
-    
-    id = DEFAULT_POFFSET_UR;
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_POFFSET_UR, &id) ) {
-        return HAL_ERROR;
+    if (HAL_ERROR == APDS9960_setProximityGain(hi2c, DEFAULT_PGAIN))
+    {
+      return HAL_ERROR;
     }
-    
-    id = DEFAULT_POFFSET_DL;
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_POFFSET_DL, &id) ) {
-        return HAL_ERROR;
+    if (HAL_ERROR == APDS9960_setAmbientLightGain(hi2c, DEFAULT_AGAIN))
+    {
+      return HAL_ERROR;
     }
-    
-    id = DEFAULT_CONFIG1;
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_CONFIG1, &id) ) {
-        return HAL_ERROR;
+    if (HAL_ERROR == APDS9960_setProxIntLowThresh(hi2c, DEFAULT_PILT))
+    {
+      return HAL_ERROR;
     }
-    
-    
-    if( !APDS9960_setLEDDrive(hi2c, DEFAULT_LDRIVE) ) {
-        return HAL_ERROR;
+    if (HAL_ERROR == APDS9960_setProxIntHighThresh(hi2c, DEFAULT_PIHT))
+    {
+      return HAL_ERROR;
     }
-    if( !APDS9960_setProximityGain(hi2c, DEFAULT_PGAIN) ) {
-        return HAL_ERROR;
+    if (HAL_ERROR == APDS9960_setLightIntLowThreshold(hi2c, DEFAULT_AILT))
+    {
+      return HAL_ERROR;
     }
-    if( !APDS9960_setAmbientLightGain(hi2c, DEFAULT_AGAIN) ) {
-        return HAL_ERROR;
-    }
-    if( !APDS9960_setProxIntLowThresh(hi2c, DEFAULT_PILT) ) {
-        return HAL_ERROR;
-    }
-    if( !APDS9960_setProxIntHighThresh(hi2c, DEFAULT_PIHT) ) {
-        return HAL_ERROR;
-    }
-    if( !APDS9960_setLightIntLowThreshold(hi2c, DEFAULT_AILT) ) {
-        return HAL_ERROR;
-    }
-    if( !APDS9960_setLightIntHighThreshold(hi2c, DEFAULT_AIHT) ) {
-        return HAL_ERROR;
+    if (HAL_ERROR == APDS9960_setLightIntHighThreshold(hi2c, DEFAULT_AIHT))
+    {
+      return HAL_ERROR;
     }
     
     id = DEFAULT_PERS;
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_PERS, &id) ) {
-        return HAL_ERROR;
+    if (HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_PERS, &id))
+    {
+      return HAL_ERROR;
     }
     
     id = DEFAULT_CONFIG2;
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_CONFIG2, &id) ) {
-        return HAL_ERROR;
+    if (HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_CONFIG2, &id))
+    {
+      return HAL_ERROR;
     }
     
     id = DEFAULT_CONFIG3;
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_CONFIG3, &id) ) {
-        return HAL_ERROR;
+    if (HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_CONFIG3, &id))
+    {
+      return HAL_ERROR;
     }
-
     /* Set default values for gesture sense registers */
-    if( !APDS9960_setGestureEnterThresh(hi2c, DEFAULT_GPENTH) ) {
-        return HAL_ERROR;
-    }
-    if( !APDS9960_setGestureExitThresh(hi2c, DEFAULT_GEXTH) ) {
-        return HAL_ERROR;
+    if (HAL_ERROR == APDS9960_setGestureEnterThresh(hi2c, DEFAULT_GPENTH))
+    {
+      return HAL_ERROR;
     }
     
+    id = DEFAULT_GEXTH;
+    if (HAL_ERROR == APDS9960_setGestureExitThresh(hi2c, &id))
+    {
+      return HAL_ERROR;
+    }
     id = DEFAULT_CONFIG1;
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_GCONF1, &id) ) {
-        return HAL_ERROR;
+    if (HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_GCONF1, &id))
+    {
+      return HAL_ERROR;
     }
-    if( !APDS9960_setGestureGain(hi2c, DEFAULT_GGAIN) ) {
-        return HAL_ERROR;
+    if (HAL_ERROR == APDS9960_setGestureGain(hi2c, DEFAULT_GGAIN))
+    {
+      return HAL_ERROR;
     }
-    if( !APDS9960_setGestureLEDDrive(hi2c, DEFAULT_GLDRIVE) ) {
-        return HAL_ERROR;
+    if (HAL_ERROR == APDS9960_setGestureLEDDrive(hi2c, DEFAULT_GLDRIVE))
+    {
+      return HAL_ERROR;
     }
-    if( !APDS9960_setGestureWaitTime(hi2c, DEFAULT_GWTIME) ) {
-        return HAL_ERROR;
+    if (HAL_ERROR == APDS9960_setGestureWaitTime(hi2c, DEFAULT_GWTIME))
+    {
+      return HAL_ERROR;
     }
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_GOFFSET_U, DEFAULT_GOFFSET) ) {
-        return HAL_ERROR;
+    id = DEFAULT_GOFFSET;
+    if (HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_GOFFSET_U, &id))
+    {
+      return HAL_ERROR;
     }
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_GOFFSET_D, DEFAULT_GOFFSET) ) {
-        return HAL_ERROR;
+    if (HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_GOFFSET_D, &id))
+    {
+      return HAL_ERROR;
     }
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_GOFFSET_L, DEFAULT_GOFFSET) ) {
-        return HAL_ERROR;
+    if (HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_GOFFSET_L, &id))
+    {
+      return HAL_ERROR;
     }
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_GOFFSET_R, DEFAULT_GOFFSET) ) {
-        return HAL_ERROR;
+    if (HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_GOFFSET_R, &id))
+    {
+      return HAL_ERROR;
     }
     
     id = DEFAULT_GPULSE;
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_GPULSE, &id) ) {
-        return HAL_ERROR;
+    if (HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_GPULSE, &id))
+    {
+      return HAL_ERROR;
     }
     
-    id = DEFAULT_CONFIG1;
-    if( !APDS9960_wireWriteDataByte(hi2c, APDS9960_GCONF3, DEFAULT_GCONF3) ) {
-        return HAL_ERROR;
+    id = DEFAULT_GCONF3;
+    if (HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_GCONF3, &id))
+    {
+      return HAL_ERROR;
     }
-    if( !APDS9960_setGestureIntEnable(hi2c, DEFAULT_GIEN) ) {
-        return HAL_ERROR;
+    if (HAL_ERROR == APDS9960_setGestureIntEnable(hi2c, DEFAULT_GIEN))
+    {
+      return HAL_ERROR;
     }
 
     return HAL_OK;
