@@ -13,7 +13,7 @@
 
 #include "mlx90614_driver.h"
 
-#define MEASURE_CYCLES 50
+#define MEASURE_CYCLES 10
 
 //****************************************************************************
 //

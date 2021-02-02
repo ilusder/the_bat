@@ -170,16 +170,15 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    ssd1306_Fill(Black);
      APDS9960_readProximity(&hi2c1, &prox_data);
-     sprintf(string_disp, "p: %d", prox_data);
-     ssd1306_SetCursor(2, 2);
-     ssd1306_WriteString(string_disp, Font_16x26, White);
-     ssd1306_UpdateScreen(&hi2c1);
-     HAL_Delay(1500);
+     sprintf(string_disp, "p: %3d  ", prox_data);
+     ssd1306_SetCursor(2, 0);
+     ssd1306_WriteString(string_disp, Font_7x10, White);
      mlx90614GetObjectTemp(&hi2c1, &temp);
-     ssd1306_SetCursor(2, 2);
+     ssd1306_SetCursor(2, 13);
      sprintf(string_disp, "t: %.2f", temp);
-     ssd1306_WriteString(string_disp, Font_16x26, White);
+     ssd1306_WriteString(string_disp, Font_7x10, White);
      ssd1306_UpdateScreen(&hi2c1);
      
      if (temp < 37.0)
