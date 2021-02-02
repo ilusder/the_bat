@@ -34,6 +34,7 @@ thumbs.db
 **/Obj/*.pbd.*
 **/Obj/*.pbi
 **/Obj/*.pbi.*
+**/Obj/*.pbw
 
 # IAR project "Debug" directory
 Debug/
@@ -49,5 +50,4 @@ Backup*
 
 # IAR .dep files
 *.dep
-*.pbw
 # End of https://www.toptal.com/developers/gitignore/api/iar
