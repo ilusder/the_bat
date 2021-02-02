@@ -1600,12 +1600,12 @@ uint8_t APDS9960_enableProximitySensor(I2C_HandleTypeDef *hi2c, uint8_t interrup
             return HAL_ERROR;
         }
     } else {
-        if( HAL_ERROR ==APDS9960_setProximityIntEnable(hi2c, 0) ) 
+        if( HAL_ERROR == APDS9960_setProximityIntEnable(hi2c, 0) ) 
         {
             return HAL_ERROR;
         }
     }
-    if( HAL_ERROR ==APDS9960_enablePower(hi2c) )
+    if( HAL_ERROR == APDS9960_enablePower(hi2c) )
     {
         return HAL_ERROR;
     }
