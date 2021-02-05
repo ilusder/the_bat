@@ -166,8 +166,8 @@ int main(void)
   ssd1306_UpdateScreen(&hi2c1);
   
   APDS9960_init(&hi2c1);
-  APDS9960_enableProximitySensor(&hi2c1, 0);
-  APDS9960_setProximityGain(&hi2c1, PGAIN_2X);
+  APDS9960_enableProximitySensor(&hi2c1, 1);
+  APDS9960_setProximityGain(&hi2c1, PGAIN_4X);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -582,11 +582,11 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
-  /*Configure GPIO pin : PB3 */
-  GPIO_InitStruct.Pin = GPIO_PIN_3;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  /*Configure GPIO pin : PROX_INT_Pin */
+  GPIO_InitStruct.Pin = PROX_INT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  HAL_GPIO_Init(PROX_INT_GPIO_Port, &GPIO_InitStruct);
 
 }
 

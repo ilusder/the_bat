@@ -60,6 +60,9 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define PROX_INT_Pin GPIO_PIN_3
+#define PROX_INT_GPIO_Port GPIOB
+#define PROX_INT_EXTI_IRQn EXTI2_3_IRQn
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
