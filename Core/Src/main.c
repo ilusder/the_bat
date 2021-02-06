@@ -166,6 +166,10 @@ int main(void)
   ssd1306_UpdateScreen(&hi2c1);
   
   APDS9960_init(&hi2c1);
+
+  APDS9960_setProximityIntHighThreshold(&hi2c1, 150);
+  APDS9960_setProximityIntLowThreshold(&hi2c1, 50);
+  
   APDS9960_enableProximitySensor(&hi2c1, 1);
   APDS9960_setProximityGain(&hi2c1, PGAIN_4X);
   /* USER CODE END 2 */
