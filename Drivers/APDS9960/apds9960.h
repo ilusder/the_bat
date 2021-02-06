@@ -235,6 +235,8 @@ uint8_t APDS9960_setLightIntHighThreshold(I2C_HandleTypeDef *hi2c, uint16_t thre
 
 uint8_t APDS9960_setLightIntLowThreshold(I2C_HandleTypeDef *hi2c, uint16_t threshold);
 
+uint8_t  APDS9960_clearProximityInt(I2C_HandleTypeDef *hi2c);
+
 uint8_t APDS9960_getMode(I2C_HandleTypeDef *hi2c, uint8_t * mode);
 
 uint8_t APDS9960_enableLightSensor(I2C_HandleTypeDef *hi2c, uint8_t interrupts);
@@ -249,7 +251,7 @@ uint8_t APDS9960_readGreenLight(I2C_HandleTypeDef *hi2c, uint16_t * val);
 
 uint8_t APDS9960_readBlueLight(I2C_HandleTypeDef *hi2c, uint16_t * val);
 
-
+uint8_t APDS9960_clearAmbientLightInt(I2C_HandleTypeDef *hi2c);
 
 uint8_t APDS9960_disableLightSensor(I2C_HandleTypeDef *hi2c);
 
