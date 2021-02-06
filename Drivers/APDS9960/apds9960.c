@@ -1063,7 +1063,7 @@ uint8_t APDS9960_getProximityIntEnable(I2C_HandleTypeDef *hi2c)
     }
 
     /* Shift and mask out PIEN bit */
-    val = (val >> 5) & 0x01;
+    val = (val >> PROXIMITY_INT) & 0x01;
 
     return val;
 }
@@ -1077,7 +1077,6 @@ uint8_t APDS9960_getProximityIntEnable(I2C_HandleTypeDef *hi2c)
 uint8_t APDS9960_setProximityIntEnable(I2C_HandleTypeDef *hi2c, uint8_t enable)
 {
     uint8_t val;
-
     /* Read value from ENABLE register */
     if( HAL_ERROR == APDS9960_wireReadDataByte(hi2c, APDS9960_ENABLE, &val) ) 
     {
@@ -1086,8 +1085,8 @@ uint8_t APDS9960_setProximityIntEnable(I2C_HandleTypeDef *hi2c, uint8_t enable)
 
     /* Set bits in register to given value */
     enable &= 0x01;
-    enable = enable << 5;
-    val &= 0xDF;
+    enable = enable << PROXIMITY_INT;
+    val &= ~PROXIMITY_INT;
     val |= enable;
 
     /* Write register value back into ENABLE register */

@@ -88,7 +88,7 @@ UART_HandleTypeDef huart1;
 DMA_HandleTypeDef hdma_usart1_tx;
 
 /* USER CODE BEGIN PV */
-
+uint8_t prox_data_ready = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -166,12 +166,11 @@ int main(void)
   ssd1306_UpdateScreen(&hi2c1);
   
   APDS9960_init(&hi2c1);
-
-  APDS9960_setProximityIntHighThreshold(&hi2c1, 150);
-  APDS9960_setProximityIntLowThreshold(&hi2c1, 50);
-  
   APDS9960_enableProximitySensor(&hi2c1, 1);
   APDS9960_setProximityGain(&hi2c1, PGAIN_4X);
+  APDS9960_clearProximityInt(&hi2c1);
+  APDS9960_clearAmbientLightInt(&hi2c1);
+  
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -179,7 +178,12 @@ int main(void)
   while (1)
   {
     ssd1306_Fill(Black);
-     APDS9960_readProximity(&hi2c1, &prox_data);
+    if (prox_data_ready)
+    {
+      APDS9960_readProximity(&hi2c1, &prox_data);
+      APDS9960_clearProximityInt(&hi2c1);
+      APDS9960_clearAmbientLightInt(&hi2c1);
+    }
      sprintf(string_disp, "p: %3d  ", prox_data);
      ssd1306_SetCursor(2, 0);
      ssd1306_WriteString(string_disp, Font_7x10, White);

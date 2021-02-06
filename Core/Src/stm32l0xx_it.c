@@ -42,7 +42,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-
+extern uint8_t prox_data_ready;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -148,7 +148,7 @@ void SysTick_Handler(void)
 void EXTI2_3_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI2_3_IRQn 0 */
-
+  prox_data_ready = 1;
   /* USER CODE END EXTI2_3_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_3);
   /* USER CODE BEGIN EXTI2_3_IRQn 1 */
