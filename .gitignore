@@ -34,7 +34,7 @@ thumbs.db
 **/Obj/*.pbd.*
 **/Obj/*.pbi
 **/Obj/*.pbi.*
-*.pbw
+**/Obj/*.pbw
 
 # IAR project "Debug" directory
 Debug/
