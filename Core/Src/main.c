@@ -102,7 +102,7 @@ static void MX_TIM22_Init(void);
 static void MX_RTC_Init(void);
 static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
-
+void enter_Sleep( void );
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -161,13 +161,17 @@ int main(void)
   HAL_WING_RIGHT_PWM_ON;
   HAL_WING_LEFT_PWM_ON;
   
-  ssd1306_SetCursor(12, 12);
-  ssd1306_WriteString("HELLO!", Font_11x18, White);
+  ssd1306_SetCursor(13, 10);
+  ssd1306_WriteString("The Bat!", Font_11x18, White);
   ssd1306_UpdateScreen(&hi2c1);
   
   APDS9960_init(&hi2c1);
   APDS9960_enableProximitySensor(&hi2c1, 1);
   APDS9960_setProximityGain(&hi2c1, PGAIN_4X);
+  
+  APDS9960_setProxIntLowThresh(&hi2c1, 0);
+  APDS9960_setProxIntHighThresh(&hi2c1, 150);
+  
   APDS9960_clearProximityInt(&hi2c1);
   APDS9960_clearAmbientLightInt(&hi2c1);
   
@@ -177,39 +181,43 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    ssd1306_Fill(Black);
     if (prox_data_ready)
     {
-      APDS9960_readProximity(&hi2c1, &prox_data);
-      APDS9960_clearProximityInt(&hi2c1);
-      APDS9960_clearAmbientLightInt(&hi2c1);
+       ssd1306_Fill(Black);
+       APDS9960_readProximity(&hi2c1, &prox_data);
+       mlx90614GetObjectTemp(&hi2c1, &temp);
+       ssd1306_SetCursor(20, 5);
+       sprintf(string_disp, "%.2f", temp);
+       ssd1306_WriteString(string_disp, Font_16x26, White);
+       ssd1306_UpdateScreen(&hi2c1);
+       if (temp < 37.0)
+       {
+          HAL_RED_EYE_LEFT_PWM_OFF;
+          HAL_RED_EYE_RIGHT_PWM_OFF;
+          HAL_GREEN_EYE_LEFT_PWM_ON;
+          HAL_GREEN_EYE_RIGHT_PWM_ON;
+       }
+       else
+       {
+         
+          HAL_RED_EYE_LEFT_PWM_ON;
+          HAL_RED_EYE_RIGHT_PWM_ON;
+          
+          HAL_GREEN_EYE_LEFT_PWM_OFF;
+          HAL_GREEN_EYE_RIGHT_PWM_OFF;
+       }
+       while (prox_data != 0) 
+       {
+         APDS9960_readProximity(&hi2c1, &prox_data);
+         HAL_Delay(700);
+       }
+       prox_data_ready = 0;
+       APDS9960_clearAmbientLightInt(&hi2c1);
+       APDS9960_clearProximityInt(&hi2c1);
+       HAL_Delay(1700);
     }
-     sprintf(string_disp, "p: %3d  ", prox_data);
-     ssd1306_SetCursor(2, 0);
-     ssd1306_WriteString(string_disp, Font_7x10, White);
-     mlx90614GetObjectTemp(&hi2c1, &temp);
-     ssd1306_SetCursor(2, 13);
-     sprintf(string_disp, "t: %.2f", temp);
-     ssd1306_WriteString(string_disp, Font_7x10, White);
-     ssd1306_UpdateScreen(&hi2c1);
-     
-     if (temp < 37.0)
-     {
-        HAL_RED_EYE_LEFT_PWM_OFF;
-        HAL_RED_EYE_RIGHT_PWM_OFF;
-        HAL_GREEN_EYE_LEFT_PWM_ON;
-        HAL_GREEN_EYE_RIGHT_PWM_ON;
-     }
-     else
-     {
-       
-         HAL_RED_EYE_LEFT_PWM_ON;
-        HAL_RED_EYE_RIGHT_PWM_ON;
-        
-        HAL_GREEN_EYE_LEFT_PWM_OFF;
-        HAL_GREEN_EYE_RIGHT_PWM_OFF;
-     }
-  HAL_Delay(500);
+    
+    
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -599,7 +607,16 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void enter_Sleep( void )
+{
+    /* Configure low-power mode */
+    SCB->SCR &= ~( SCB_SCR_SLEEPDEEP_Msk );  // low-power mode = sleep mode
+    SCB->SCR |= SCB_SCR_SLEEPONEXIT_Msk;     // reenter low-power mode after ISR
+     
+    /* Ensure Flash memory stays on */
+    FLASH->ACR &= ~FLASH_ACR_SLEEP_PD;
+    __WFI();  // enter low-power mode
+}
 /* USER CODE END 4 */
 
 /**

@@ -235,6 +235,9 @@ uint8_t APDS9960_setLightIntHighThreshold(I2C_HandleTypeDef *hi2c, uint16_t thre
 
 uint8_t APDS9960_setLightIntLowThreshold(I2C_HandleTypeDef *hi2c, uint16_t threshold);
 
+uint8_t APDS9960_setProxIntLowThresh(I2C_HandleTypeDef *hi2c, uint8_t threshold);
+uint8_t APDS9960_setProxIntHighThresh(I2C_HandleTypeDef *hi2c, uint8_t threshold);
+
 uint8_t  APDS9960_clearProximityInt(I2C_HandleTypeDef *hi2c);
 
 uint8_t APDS9960_getMode(I2C_HandleTypeDef *hi2c, uint8_t * mode);
