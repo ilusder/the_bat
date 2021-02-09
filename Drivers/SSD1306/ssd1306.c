@@ -224,3 +224,21 @@ void ssd1306_SetCursor(uint8_t x, uint8_t y)
     SSD1306.CurrentX = x;
     SSD1306.CurrentY = y;
 }
+
+
+//
+//  Display OFF
+//
+void ssd1306_Display_Off(I2C_HandleTypeDef *hi2c)
+{
+    ssd1306_WriteCommand(hi2c, 0xAE);   // Turn off SSD1306 panel
+}
+
+
+//
+//  Display ON
+//
+void ssd1306_Display_On(I2C_HandleTypeDef *hi2c)
+{
+    ssd1306_WriteCommand(hi2c, 0xAF);   // Turn on SSD1306 panel
+}

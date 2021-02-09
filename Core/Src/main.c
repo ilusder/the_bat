@@ -82,6 +82,7 @@ DMA_HandleTypeDef hdma_i2c1_tx;
 RTC_HandleTypeDef hrtc;
 
 TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim21;
 TIM_HandleTypeDef htim22;
 
 UART_HandleTypeDef huart1;
@@ -100,6 +101,7 @@ static void MX_USART1_UART_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM22_Init(void);
 static void MX_RTC_Init(void);
+static void MX_TIM21_Init(void);
 static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
 void enter_Sleep( void );
@@ -146,6 +148,7 @@ int main(void)
   MX_TIM2_Init();
   MX_TIM22_Init();
   MX_RTC_Init();
+  MX_TIM21_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();
@@ -169,9 +172,6 @@ int main(void)
   APDS9960_enableProximitySensor(&hi2c1, 1);
   APDS9960_setProximityGain(&hi2c1, PGAIN_4X);
   
-  APDS9960_setProxIntLowThresh(&hi2c1, 0);
-  APDS9960_setProxIntHighThresh(&hi2c1, 150);
-  
   APDS9960_clearProximityInt(&hi2c1);
   APDS9960_clearAmbientLightInt(&hi2c1);
   
@@ -181,16 +181,19 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    if (prox_data_ready)
+    if (prox_data_ready == 1)
     {
        ssd1306_Fill(Black);
        APDS9960_readProximity(&hi2c1, &prox_data);
+       prox_data_ready = 0;
        mlx90614GetObjectTemp(&hi2c1, &temp);
        ssd1306_SetCursor(20, 5);
        sprintf(string_disp, "%.2f", temp);
        ssd1306_WriteString(string_disp, Font_16x26, White);
+       ssd1306_Display_On(&hi2c1);
        ssd1306_UpdateScreen(&hi2c1);
-       if (temp < 37.0)
+       
+       if (temp < 37.3)
        {
           HAL_RED_EYE_LEFT_PWM_OFF;
           HAL_RED_EYE_RIGHT_PWM_OFF;
@@ -199,25 +202,27 @@ int main(void)
        }
        else
        {
-         
           HAL_RED_EYE_LEFT_PWM_ON;
           HAL_RED_EYE_RIGHT_PWM_ON;
-          
           HAL_GREEN_EYE_LEFT_PWM_OFF;
           HAL_GREEN_EYE_RIGHT_PWM_OFF;
        }
-       while (prox_data != 0) 
-       {
-         APDS9960_readProximity(&hi2c1, &prox_data);
-         HAL_Delay(700);
-       }
-       prox_data_ready = 0;
-       APDS9960_clearAmbientLightInt(&hi2c1);
-       APDS9960_clearProximityInt(&hi2c1);
-       HAL_Delay(1700);
+       HAL_TIM_Base_Start_IT(&htim21);
     }
-    
-    
+    if (prox_data_ready == 2)
+    {
+      //display off
+      HAL_TIM_Base_Stop_IT(&htim21);
+      ssd1306_Display_Off(&hi2c1);
+      HAL_RED_EYE_LEFT_PWM_OFF;
+      HAL_RED_EYE_RIGHT_PWM_OFF;
+      HAL_GREEN_EYE_LEFT_PWM_OFF;
+      HAL_GREEN_EYE_RIGHT_PWM_OFF;
+      prox_data_ready = 0;
+    }
+     APDS9960_clearProximityInt(&hi2c1);
+     APDS9960_clearAmbientLightInt(&hi2c1);
+     
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -293,6 +298,9 @@ static void MX_NVIC_Init(void)
   /* DMA1_Channel4_5_6_7_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Channel4_5_6_7_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel4_5_6_7_IRQn);
+  /* TIM21_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(TIM21_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(TIM21_IRQn);
 }
 
 /**
@@ -472,6 +480,51 @@ static void MX_TIM2_Init(void)
 
   /* USER CODE END TIM2_Init 2 */
   HAL_TIM_MspPostInit(&htim2);
+
+}
+
+/**
+  * @brief TIM21 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM21_Init(void)
+{
+
+  /* USER CODE BEGIN TIM21_Init 0 */
+
+  /* USER CODE END TIM21_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM21_Init 1 */
+
+  /* USER CODE END TIM21_Init 1 */
+  htim21.Instance = TIM21;
+  htim21.Init.Prescaler = 29999;
+  htim21.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim21.Init.Period = 13999;
+  htim21.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim21.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim21) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim21, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim21, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM21_Init 2 */
+
+  /* USER CODE END TIM21_Init 2 */
 
 }
 

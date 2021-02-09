@@ -149,7 +149,7 @@
 #define DEFAULT_PGAIN           PGAIN_4X
 #define DEFAULT_AGAIN           AGAIN_4X
 #define DEFAULT_PILT            0       // Low proximity threshold
-#define DEFAULT_PIHT            50      // High proximity threshold
+#define DEFAULT_PIHT            150      // High proximity threshold
 #define DEFAULT_AILT            0xFFFF  // Force interrupt for calibration
 #define DEFAULT_AIHT            0
 #define DEFAULT_PERS            0x11    // 2 consecutive prox or ALS for int.
