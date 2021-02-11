@@ -105,6 +105,8 @@ static void MX_TIM21_Init(void);
 static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
 void enter_Sleep( void );
+void enter_Stop( void );
+void enter_Standby( void );
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -174,7 +176,7 @@ int main(void)
   
   APDS9960_clearProximityInt(&hi2c1);
   APDS9960_clearAmbientLightInt(&hi2c1);
-  
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -207,6 +209,7 @@ int main(void)
           HAL_GREEN_EYE_LEFT_PWM_OFF;
           HAL_GREEN_EYE_RIGHT_PWM_OFF;
        }
+       __HAL_TIM_SET_COUNTER(&htim21, 10);
        HAL_TIM_Base_Start_IT(&htim21);
     }
     if (prox_data_ready == 2)
@@ -222,7 +225,6 @@ int main(void)
     }
      APDS9960_clearProximityInt(&hi2c1);
      APDS9960_clearAmbientLightInt(&hi2c1);
-     
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -457,13 +459,14 @@ static void MX_TIM2_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 20;
+  sConfigOC.Pulse = 5;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
   {
     Error_Handler();
   }
+  sConfigOC.Pulse = 20;
   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
   {
     Error_Handler();
@@ -472,6 +475,7 @@ static void MX_TIM2_Init(void)
   {
     Error_Handler();
   }
+  sConfigOC.Pulse = 5;
   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_4) != HAL_OK)
   {
     Error_Handler();
@@ -504,7 +508,7 @@ static void MX_TIM21_Init(void)
   htim21.Instance = TIM21;
   htim21.Init.Prescaler = 29999;
   htim21.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim21.Init.Period = 13999;
+  htim21.Init.Period = 5999;
   htim21.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim21.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim21) != HAL_OK)
@@ -660,6 +664,44 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void enter_Stop( void )
+{   
+    /* Enable Clocks */
+    RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+    RCC->IOPENR |= RCC_IOPENR_GPIOAEN;
+     
+    /* Configure PA0 as External Interrupt */
+    GPIOA->MODER &= ~( GPIO_MODER_MODE0 ); // PA0 is in Input mode
+    EXTI->IMR |= EXTI_IMR_IM0; // interrupt request from line 0 not masked
+    EXTI->RTSR |= EXTI_RTSR_TR0; // rising trigger enabled for input line 0
+     
+     
+    /* Prepare to enter stop mode */
+    PWR->CR |= PWR_CR_CWUF; // clear the WUF flag after 2 clock cycles
+    PWR->CR &= ~( PWR_CR_PDDS ); // Enter stop mode when the CPU enters deepsleep
+    RCC->CFGR |= RCC_CFGR_STOPWUCK; // HSI16 oscillator is wake-up from stop clock
+    SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk; // low-power mode = stop mode
+    __WFI(); // enter low-power mode
+}
+
+void enter_Standby( void )
+{
+    /* Enable Clocks */
+    RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+     
+    /* Prepare for Standby */
+    // if WKUP pins are already high, the WUF bit will be set
+    PWR->CSR |= PWR_CSR_EWUP1 | PWR_CSR_EWUP2;
+     
+    PWR->CR |= PWR_CR_CWUF; // clear the WUF flag after 2 clock cycles
+    PWR->CR |= PWR_CR_ULP;   // V_{REFINT} is off in low-power mode
+    PWR->CR |= PWR_CR_PDDS; // Enter Standby mode when the CPU enters deepsleep
+     
+    SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk; // low-power mode = stop mode
+    SCB->SCR |= SCB_SCR_SLEEPONEXIT_Msk; // reenter low-power mode after ISR
+    __WFI(); // enter low-power mode
+}
+
 void enter_Sleep( void )
 {
     /* Configure low-power mode */
