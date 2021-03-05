@@ -51,3 +51,7 @@ Backup*
 # IAR .dep files
 *.dep
 # End of https://www.toptal.com/developers/gitignore/api/iar
+
+
+# VS Code
+.vscode
