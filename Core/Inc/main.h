@@ -64,6 +64,18 @@ void Error_Handler(void);
 #define PROX_INT_GPIO_Port GPIOB
 #define PROX_INT_EXTI_IRQn EXTI2_3_IRQn
 /* USER CODE BEGIN Private defines */
+typedef enum 
+{
+  POWERUP,
+  SHOW_LOGO,
+  WAIT_FOR_PROX_START,
+  WAIT_FOR_PROX,
+  TEMP_MEASURE,
+  TEMP_RESULT,
+  DISPLAY_DELAY,
+  GOTO_SLEEP,
+  WAKE_UP
+} MState;
 
 /* USER CODE END Private defines */
 

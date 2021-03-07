@@ -90,6 +90,7 @@ DMA_HandleTypeDef hdma_usart1_tx;
 
 /* USER CODE BEGIN PV */
 uint8_t prox_data_ready = 0;
+MState CurrentState = POWERUP;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -106,7 +107,7 @@ static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
 void enter_Sleep( void );
 void enter_Stop( void );
-void enter_Standby( void );
+void enter_Standby( void ); 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -155,27 +156,6 @@ int main(void)
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
-  ssd1306_Init(&hi2c1);
-  ssd1306_Fill(Black);
-  ssd1306_UpdateScreen(&hi2c1);
-  HAL_RED_EYE_LEFT_PWM_OFF;
-  HAL_RED_EYE_RIGHT_PWM_OFF;
-  HAL_GREEN_EYE_LEFT_PWM_OFF;
-  HAL_GREEN_EYE_RIGHT_PWM_OFF;
-  
-  HAL_WING_RIGHT_PWM_ON;
-  HAL_WING_LEFT_PWM_ON;
-  
-  ssd1306_SetCursor(13, 10);
-  ssd1306_WriteString("The Bat!", Font_11x18, White);
-  ssd1306_UpdateScreen(&hi2c1);
-  
-  APDS9960_init(&hi2c1);
-  APDS9960_enableProximitySensor(&hi2c1, 1);
-  APDS9960_setProximityGain(&hi2c1, PGAIN_4X);
-  
-  APDS9960_clearProximityInt(&hi2c1);
-  APDS9960_clearAmbientLightInt(&hi2c1);
 
   /* USER CODE END 2 */
 
@@ -183,37 +163,66 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    if (prox_data_ready == 1)
+    switch (CurrentState)
     {
-       ssd1306_Fill(Black);
-       APDS9960_readProximity(&hi2c1, &prox_data);
-       prox_data_ready = 0;
-       mlx90614GetObjectTemp(&hi2c1, &temp);
-       ssd1306_SetCursor(20, 5);
-       sprintf(string_disp, "%.2f", temp);
-       ssd1306_WriteString(string_disp, Font_16x26, White);
-       ssd1306_Display_On(&hi2c1);
-       ssd1306_UpdateScreen(&hi2c1);
-       
-       if (temp < 37.3)
-       {
-          HAL_RED_EYE_LEFT_PWM_OFF;
-          HAL_RED_EYE_RIGHT_PWM_OFF;
-          HAL_GREEN_EYE_LEFT_PWM_ON;
-          HAL_GREEN_EYE_RIGHT_PWM_ON;
-       }
+    case POWERUP:
+      ssd1306_Init(&hi2c1);
+      ssd1306_Fill(Black);
+      ssd1306_UpdateScreen(&hi2c1);
+      APDS9960_init(&hi2c1);
+      HAL_RED_EYE_LEFT_PWM_OFF;
+      HAL_RED_EYE_RIGHT_PWM_OFF;
+      HAL_GREEN_EYE_LEFT_PWM_OFF;
+      HAL_GREEN_EYE_RIGHT_PWM_OFF;
+      
+      HAL_WING_RIGHT_PWM_ON;
+      HAL_WING_LEFT_PWM_ON;
+      CurrentState = SHOW_LOGO;
+      break;
+    case SHOW_LOGO:
+      ssd1306_SetCursor(13, 10);
+      ssd1306_WriteString("The Bat!", Font_11x18, White);
+      ssd1306_UpdateScreen(&hi2c1);
+      CurrentState = WAIT_FOR_PROX_START;
+      break;
+    case WAIT_FOR_PROX_START:
+      APDS9960_enableProximitySensor(&hi2c1, 1);
+      APDS9960_setProximityGain(&hi2c1, PGAIN_4X);
+      
+      APDS9960_clearProximityInt(&hi2c1);
+      APDS9960_clearAmbientLightInt(&hi2c1);
+      CurrentState = WAIT_FOR_PROX;
+      break;
+    case TEMP_MEASURE:
+      mlx90614GetObjectTemp(&hi2c1, &temp);
+      CurrentState = TEMP_RESULT;
+      break;
+    case TEMP_RESULT:
+      ssd1306_Fill(Black);
+      ssd1306_SetCursor(20, 5);
+      sprintf(string_disp, "%.2f", temp);
+      ssd1306_WriteString(string_disp, Font_16x26, White);
+      ssd1306_Display_On(&hi2c1);
+      ssd1306_UpdateScreen(&hi2c1);
+      if (temp < 37.3)
+      {
+        HAL_RED_EYE_LEFT_PWM_OFF;
+        HAL_RED_EYE_RIGHT_PWM_OFF;
+        HAL_GREEN_EYE_LEFT_PWM_ON;
+        HAL_GREEN_EYE_RIGHT_PWM_ON;
+      }
        else
-       {
-          HAL_RED_EYE_LEFT_PWM_ON;
-          HAL_RED_EYE_RIGHT_PWM_ON;
-          HAL_GREEN_EYE_LEFT_PWM_OFF;
-          HAL_GREEN_EYE_RIGHT_PWM_OFF;
-       }
-       __HAL_TIM_SET_COUNTER(&htim21, 10);
-       HAL_TIM_Base_Start_IT(&htim21);
-    }
-    if (prox_data_ready == 2)
-    {
+      {
+        HAL_RED_EYE_LEFT_PWM_ON;
+        HAL_RED_EYE_RIGHT_PWM_ON;
+        HAL_GREEN_EYE_LEFT_PWM_OFF;
+        HAL_GREEN_EYE_RIGHT_PWM_OFF;
+      }
+      __HAL_TIM_SET_COUNTER(&htim21, 10);
+      HAL_TIM_Base_Start_IT(&htim21);
+      CurrentState = DISPLAY_DELAY;
+      break;
+    case GOTO_SLEEP:
       //display off
       HAL_TIM_Base_Stop_IT(&htim21);
       ssd1306_Display_Off(&hi2c1);
@@ -221,10 +230,16 @@ int main(void)
       HAL_RED_EYE_RIGHT_PWM_OFF;
       HAL_GREEN_EYE_LEFT_PWM_OFF;
       HAL_GREEN_EYE_RIGHT_PWM_OFF;
-      prox_data_ready = 0;
+
+      //SLEEP
+      APDS9960_clearProximityInt(&hi2c1);
+      APDS9960_clearAmbientLightInt(&hi2c1);
+      CurrentState = DISPLAY_DELAY;
+      break;
+    default:
+      break;
     }
-     APDS9960_clearProximityInt(&hi2c1);
-     APDS9960_clearAmbientLightInt(&hi2c1);
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
