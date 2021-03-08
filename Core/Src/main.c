@@ -191,7 +191,8 @@ int main(void)
       
       APDS9960_clearProximityInt(&hi2c1);
       APDS9960_clearAmbientLightInt(&hi2c1);
-      CurrentState = WAIT_FOR_PROX;
+      HAL_TIM_Base_Start_IT(&htim21);
+      CurrentState = DISPLAY_DELAY;
       break;
     case TEMP_MEASURE:
       mlx90614GetObjectTemp(&hi2c1, &temp);
