@@ -124,7 +124,6 @@ int main(void)
   /* USER CODE BEGIN 1 */
   float temp;
   char string_disp[11];
-  uint8_t prox_data;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -212,7 +211,7 @@ int main(void)
         HAL_GREEN_EYE_LEFT_PWM_ON;
         HAL_GREEN_EYE_RIGHT_PWM_ON;
       }
-       else
+      else
       {
         HAL_RED_EYE_LEFT_PWM_ON;
         HAL_RED_EYE_RIGHT_PWM_ON;
@@ -231,7 +230,6 @@ int main(void)
       HAL_RED_EYE_RIGHT_PWM_OFF;
       HAL_GREEN_EYE_LEFT_PWM_OFF;
       HAL_GREEN_EYE_RIGHT_PWM_OFF;
-
       //SLEEP
       APDS9960_clearProximityInt(&hi2c1);
       APDS9960_clearAmbientLightInt(&hi2c1);
