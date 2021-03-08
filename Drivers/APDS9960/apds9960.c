@@ -1310,7 +1310,7 @@ uint8_t APDS9960_init(I2C_HandleTypeDef *hi2c)
       return HAL_ERROR;
     }
     
-    id = DEFAULT_CONFIG3;
+    id = DEFAULT_CONFIG4;
     if (HAL_ERROR == APDS9960_wireWriteDataByte(hi2c, APDS9960_CONFIG3, &id))
     {
       return HAL_ERROR;
