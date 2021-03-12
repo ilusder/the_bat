@@ -122,6 +122,7 @@ void enter_Standby( void );
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+  uint8_t prox_data;
   float temp;
   char string_disp[11];
   /* USER CODE END 1 */
@@ -226,14 +227,15 @@ int main(void)
       //display off
       HAL_TIM_Base_Stop_IT(&htim21);
       ssd1306_Display_Off(&hi2c1);
+      //LEDS OFF
       HAL_RED_EYE_LEFT_PWM_OFF;
       HAL_RED_EYE_RIGHT_PWM_OFF;
       HAL_GREEN_EYE_LEFT_PWM_OFF;
       HAL_GREEN_EYE_RIGHT_PWM_OFF;
-      //SLEEP
       APDS9960_clearProximityInt(&hi2c1);
       APDS9960_clearAmbientLightInt(&hi2c1);
-      CurrentState = DISPLAY_DELAY;
+      //SLEEP
+      enter_Stop();
       break;
     default:
       break;
@@ -685,9 +687,9 @@ void enter_Stop( void )
     RCC->IOPENR |= RCC_IOPENR_GPIOAEN;
      
     /* Configure PA0 as External Interrupt */
-    GPIOA->MODER &= ~( GPIO_MODER_MODE0 ); // PA0 is in Input mode
-    EXTI->IMR |= EXTI_IMR_IM0; // interrupt request from line 0 not masked
-    EXTI->RTSR |= EXTI_RTSR_TR0; // rising trigger enabled for input line 0
+    GPIOB->MODER &= ~( GPIO_MODER_MODE3 ); // PB3 is in Input mode
+    EXTI->IMR |= EXTI_IMR_IM3; // interrupt request from line 3 not masked
+    EXTI->FTSR |= EXTI_FTSR_TR3; // rising trigger enabled for input line 3
      
      
     /* Prepare to enter stop mode */
