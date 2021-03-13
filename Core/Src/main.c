@@ -219,9 +219,19 @@ int main(void)
         HAL_GREEN_EYE_LEFT_PWM_OFF;
         HAL_GREEN_EYE_RIGHT_PWM_OFF;
       }
+      do
+      {
+        APDS9960_readProximity(&hi2c1, &prox_data);
+        APDS9960_clearProximityInt(&hi2c1);
+        APDS9960_clearAmbientLightInt(&hi2c1);
+      }
+      while(prox_data < 255);
       __HAL_TIM_SET_COUNTER(&htim21, 10);
       HAL_TIM_Base_Start_IT(&htim21);
+      APDS9960_clearProximityInt(&hi2c1);
+      APDS9960_clearAmbientLightInt(&hi2c1);
       CurrentState = DISPLAY_DELAY;
+
       break;
     case GOTO_SLEEP:
       //display off
@@ -232,10 +242,19 @@ int main(void)
       HAL_RED_EYE_RIGHT_PWM_OFF;
       HAL_GREEN_EYE_LEFT_PWM_OFF;
       HAL_GREEN_EYE_RIGHT_PWM_OFF;
-      APDS9960_clearProximityInt(&hi2c1);
-      APDS9960_clearAmbientLightInt(&hi2c1);
-      //SLEEP
-      enter_Stop();
+      APDS9960_wireReadDataByte(&hi2c1, APDS9960_STATUS, &prox_data);
+      if (prox_data & 0x20)
+      {
+        APDS9960_readProximity(&hi2c1,  &prox_data);
+        if (prox_data == 255)
+        {
+          APDS9960_clearProximityInt(&hi2c1);
+          APDS9960_clearAmbientLightInt(&hi2c1);
+          //SLEEP
+          enter_Stop();
+        }
+      }
+
       break;
     default:
       break;
