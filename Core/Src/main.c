@@ -183,16 +183,25 @@ int main(void)
       ssd1306_SetCursor(13, 10);
       ssd1306_WriteString("The Bat!", Font_11x18, White);
       ssd1306_UpdateScreen(&hi2c1);
-      CurrentState = WAIT_FOR_PROX_START;
+      CurrentState = PROX_CONFIG_FOR_POLLING;
       break;
-    case WAIT_FOR_PROX_START:
-      APDS9960_enableProximitySensor(&hi2c1, 1);
-      APDS9960_setProximityGain(&hi2c1, PGAIN_4X);
-      
-      APDS9960_clearProximityInt(&hi2c1);
-      APDS9960_clearAmbientLightInt(&hi2c1);
-      HAL_TIM_Base_Start_IT(&htim21);
-      CurrentState = DISPLAY_DELAY;
+    case PROX_CONFIG_FOR_POLLING:
+      APDS9960_enableProximitySensor(&hi2c1, 0);
+      APDS9960_setProximityGain(&hi2c1, PGAIN_2X);
+      CurrentState = WAIT_FOR_HAND;
+      break;
+    case WAIT_FOR_HAND:
+      APDS9960_readProximity(&hi2c1, &prox_data);
+      if (prox_data > 50)
+      {
+        __HAL_TIM_SET_COUNTER(&htim21, 0);
+        HAL_TIM_Base_Stop_IT(&htim21);
+        CurrentState = TEMP_MEASURE;
+      }
+      else if (prox_data < 20)
+      {
+        HAL_TIM_Base_Start_IT(&htim21);
+      }
       break;
     case TEMP_MEASURE:
       mlx90614GetObjectTemp(&hi2c1, &temp);
@@ -219,42 +228,25 @@ int main(void)
         HAL_GREEN_EYE_LEFT_PWM_OFF;
         HAL_GREEN_EYE_RIGHT_PWM_OFF;
       }
-      do
-      {
-        APDS9960_readProximity(&hi2c1, &prox_data);
-        APDS9960_clearProximityInt(&hi2c1);
-        APDS9960_clearAmbientLightInt(&hi2c1);
-      }
-      while(prox_data < 255);
-      __HAL_TIM_SET_COUNTER(&htim21, 10);
-      HAL_TIM_Base_Start_IT(&htim21);
-      APDS9960_clearProximityInt(&hi2c1);
-      APDS9960_clearAmbientLightInt(&hi2c1);
-      CurrentState = DISPLAY_DELAY;
-
+      CurrentState = PROX_CONFIG_FOR_POLLING;
       break;
     case GOTO_SLEEP:
       //display off
       HAL_TIM_Base_Stop_IT(&htim21);
       ssd1306_Display_Off(&hi2c1);
+      APDS9960_enableProximitySensor(&hi2c1, 1);
       //LEDS OFF
       HAL_RED_EYE_LEFT_PWM_OFF;
       HAL_RED_EYE_RIGHT_PWM_OFF;
       HAL_GREEN_EYE_LEFT_PWM_OFF;
       HAL_GREEN_EYE_RIGHT_PWM_OFF;
-      APDS9960_wireReadDataByte(&hi2c1, APDS9960_STATUS, &prox_data);
-      if (prox_data & 0x20)
-      {
-        APDS9960_readProximity(&hi2c1,  &prox_data);
-        if (prox_data == 255)
-        {
-          APDS9960_clearProximityInt(&hi2c1);
-          APDS9960_clearAmbientLightInt(&hi2c1);
-          //SLEEP
-          enter_Stop();
-        }
-      }
-
+      //set-up proximity interrupt
+      APDS9960_clearProximityInt(&hi2c1);
+      APDS9960_clearAmbientLightInt(&hi2c1);
+      //SLEEP
+      enter_Stop();
+      ssd1306_Display_On(&hi2c1);
+      CurrentState = TEMP_MEASURE;
       break;
     default:
       break;
