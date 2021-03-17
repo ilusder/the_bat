@@ -185,6 +185,7 @@ int main(void)
         ssd1306_SetCursor(13, 10);
         ssd1306_WriteString("The Bat!", Font_11x18, White);
         ssd1306_UpdateScreen(&hi2c1);
+        HAL_Delay(3000);
         NextState = PROX_CONFIG_FOR_POLLING;
         break;
       case PROX_CONFIG_FOR_POLLING:
@@ -539,7 +540,7 @@ static void MX_TIM21_Init(void)
   htim21.Instance = TIM21;
   htim21.Init.Prescaler = 29999;
   htim21.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim21.Init.Period = 5999;
+  htim21.Init.Period = 7999;
   htim21.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim21.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim21) != HAL_OK)
