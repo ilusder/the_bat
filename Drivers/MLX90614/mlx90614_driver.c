@@ -76,7 +76,7 @@ int16_t mlx90614GetObjectTemp(I2C_HandleTypeDef * i2cHandle, float * data)
       return HAL_ERROR;
     HAL_Delay(50);
   }
-  *data = max_temp * 0.02 - 273.15;
+  *data = max_temp * 0.02 - 272.15;
   return HAL_OK;
 }
 

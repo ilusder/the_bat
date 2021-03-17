@@ -145,7 +145,7 @@
 #define DEFAULT_POFFSET_UR      0       // 0 offset
 #define DEFAULT_POFFSET_DL      0       // 0 offset      
 #define DEFAULT_CONFIG1         0x60    // No 12x wait (WTIME) factor
-#define DEFAULT_LDRIVE          LED_DRIVE_100MA
+#define DEFAULT_LDRIVE          LED_DRIVE_50MA
 #define DEFAULT_PGAIN           PGAIN_4X
 #define DEFAULT_AGAIN           AGAIN_4X
 #define DEFAULT_PILT            0       // Low proximity threshold

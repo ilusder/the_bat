@@ -63,6 +63,7 @@ extern TIM_HandleTypeDef htim21;
 extern DMA_HandleTypeDef hdma_usart1_tx;
 /* USER CODE BEGIN EV */
 extern MState CurrentState;
+extern MState NextState;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -192,7 +193,7 @@ void DMA1_Channel4_5_6_7_IRQHandler(void)
 void TIM21_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM21_IRQn 0 */
-  CurrentState = GOTO_SLEEP;
+  NextState = GOTO_SLEEP;
   /* USER CODE END TIM21_IRQn 0 */
   HAL_TIM_IRQHandler(&htim21);
   /* USER CODE BEGIN TIM21_IRQn 1 */
