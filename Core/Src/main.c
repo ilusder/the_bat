@@ -214,7 +214,7 @@ int main(void)
       case TEMP_RESULT:
         ssd1306_Fill(Black);
         ssd1306_SetCursor(20, 5);
-        sprintf(string_disp, "%.2f", temp);
+        sprintf(string_disp, "%.2f'C", temp);
         ssd1306_WriteString(string_disp, Font_16x26, White);
         ssd1306_Display_On(&hi2c1);
         ssd1306_UpdateScreen(&hi2c1);
