@@ -248,6 +248,7 @@ int main(void)
         //set-up proximity interrupt
         APDS9960_clearProximityInt(&hi2c1);
         APDS9960_clearAmbientLightInt(&hi2c1);
+        mlx90614SleepMode(&hi2c1);
         //SLEEP
         enter_Stop();
         ssd1306_Display_On(&hi2c1);
@@ -700,9 +701,11 @@ void enter_Stop( void )
 {   
     /* Enable Clocks */
     RCC->APB1ENR |= RCC_APB1ENR_PWREN;
-    RCC->IOPENR |= RCC_IOPENR_GPIOAEN;
+    RCC->IOPENR |= RCC_IOPENR_GPIOBEN;
+
+
      
-    /* Configure PA0 as External Interrupt */
+    /* Configure PB0 as External Interrupt */
     GPIOB->MODER &= ~( GPIO_MODER_MODE3 ); // PB3 is in Input mode
     EXTI->IMR |= EXTI_IMR_IM3; // interrupt request from line 3 not masked
     EXTI->FTSR |= EXTI_FTSR_TR3; // rising trigger enabled for input line 3
@@ -739,6 +742,11 @@ void enter_Sleep( void )
     /* Configure low-power mode */
     SCB->SCR &= ~( SCB_SCR_SLEEPDEEP_Msk );  // low-power mode = sleep mode
     SCB->SCR |= SCB_SCR_SLEEPONEXIT_Msk;     // reenter low-power mode after ISR
+
+    /* Configure PB0 as External Interrupt */
+    GPIOB->MODER &= ~( GPIO_MODER_MODE3 ); // PB3 is in Input mode
+    EXTI->IMR |= EXTI_IMR_IM3; // interrupt request from line 3 not masked
+    EXTI->FTSR |= EXTI_FTSR_TR3; // rising trigger enabled for input line 3
      
     /* Ensure Flash memory stays on */
     FLASH->ACR &= ~FLASH_ACR_SLEEP_PD;

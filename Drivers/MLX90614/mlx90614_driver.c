@@ -15,6 +15,26 @@
 
 #define MEASURE_CYCLES 10
 
+
+//****************************************************************************
+//
+//! \brief MLX90614 sleep mode
+//!
+//! \param[in]    i2cHandle        the handle to the openned i2c device
+//!
+//! \return  none
+//
+//****************************************************************************
+void mlx90614SleepMode(I2C_HandleTypeDef * i2cHandle)
+{
+
+  uint8_t data = MLX90614_OP_SLEEP;
+  HAL_I2C_Mem_Write(i2cHandle, MLX90614_ADDR, 
+                              MLX90614_OP_SLEEP, I2C_MEMADD_SIZE_8BIT, 
+                              &data, 0,
+                              100);
+}
+
 //****************************************************************************
 //
 //! \brief Read from the MLX90614 with defaults

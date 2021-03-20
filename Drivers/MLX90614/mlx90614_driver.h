@@ -23,6 +23,8 @@
 // mlx90614 Device I2C address
 //*****************************************************************************
 #define MLX90614_ADDR        (0x5A << 1)
+
+#define MLX90614_CONFIG             0x05    /**< EEPROM reg - Configuration register */
 #define MLX90614_OBJECT_THEMP       0x07
 #define MLX90614_AMBIENT_THEMP       0x06
 
@@ -59,6 +61,8 @@
 int16_t mlx90614GetTemp(I2C_HandleTypeDef * i2cHandle, uint8_t data_addr, uint16_t * data);
 int16_t mlx90614GetObjectTemp(I2C_HandleTypeDef * i2cHandle, float * data);
 int16_t mlx90614GetEnviromentTemp(I2C_HandleTypeDef * i2cHandle, float * data);
+
+void mlx90614SleepMode(I2C_HandleTypeDef * i2cHandle);
 int32_t mlx90632_i2c_write(I2C_HandleTypeDef * i2cHandle, int16_t register_address, uint16_t value);
 int32_t mlx90632_i2c_read32(I2C_HandleTypeDef * i2cHandle, int16_t register_address, uint32_t *value);
 int32_t mlx90632_i2c_read(I2C_HandleTypeDef * i2cHandle, int16_t register_address, uint16_t *value);
