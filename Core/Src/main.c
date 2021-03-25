@@ -167,6 +167,7 @@ int main(void)
     switch (CurrentState)
     {
       case POWERUP:
+        HAL_TIM_Base_Start_IT(&htim21);
         ssd1306_Init(&hi2c1);
         ssd1306_Fill(Black);
         ssd1306_UpdateScreen(&hi2c1);
@@ -175,7 +176,6 @@ int main(void)
         HAL_RED_EYE_RIGHT_PWM_OFF;
         HAL_GREEN_EYE_LEFT_PWM_OFF;
         HAL_GREEN_EYE_RIGHT_PWM_OFF;
-        
         HAL_WING_RIGHT_PWM_ON;
         HAL_WING_LEFT_PWM_ON;
         NextState = SHOW_LOGO;
