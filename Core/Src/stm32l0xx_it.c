@@ -193,7 +193,15 @@ void DMA1_Channel4_5_6_7_IRQHandler(void)
 void TIM21_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM21_IRQn 0 */
-  NextState = GOTO_SLEEP;
+  if (CurrentState != POWERUP)
+  {
+      NextState = GOTO_SLEEP;
+  }
+  else
+  {
+    HAL_TIM_Base_Stop_IT(&htim21);
+  }
+
   /* USER CODE END TIM21_IRQn 0 */
   HAL_TIM_IRQHandler(&htim21);
   /* USER CODE BEGIN TIM21_IRQn 1 */

@@ -154,11 +154,10 @@ int main(void)
   MX_TIM22_Init();
   MX_RTC_Init();
   MX_TIM21_Init();
-
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
-
+  HAL_TIM_Base_Start_IT(&htim21);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -180,6 +179,7 @@ int main(void)
         HAL_WING_RIGHT_PWM_ON;
         HAL_WING_LEFT_PWM_ON;
         NextState = SHOW_LOGO;
+        
         break;
       case SHOW_LOGO:
         ssd1306_SetCursor(13, 10);
@@ -251,6 +251,8 @@ int main(void)
         mlx90614SleepMode(&hi2c1);
         //SLEEP
         enter_Stop();
+        __HAL_RCC_GPIOA_CLK_ENABLE();
+        __HAL_RCC_I2C1_CLK_ENABLE();
         ssd1306_Display_On(&hi2c1);
         NextState = PROX_CONFIG_FOR_POLLING;
         break;
@@ -699,24 +701,35 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 void enter_Stop( void )
 {   
-    /* Enable Clocks */
+        /* Enable Clocks */
     RCC->APB1ENR |= RCC_APB1ENR_PWREN;
-    RCC->IOPENR |= RCC_IOPENR_GPIOBEN;
-
-
+    RCC->IOPENR |= RCC_IOPENR_GPIOAEN;
      
     /* Configure PB0 as External Interrupt */
     GPIOB->MODER &= ~( GPIO_MODER_MODE3 ); // PB3 is in Input mode
     EXTI->IMR |= EXTI_IMR_IM3; // interrupt request from line 3 not masked
     EXTI->FTSR |= EXTI_FTSR_TR3; // rising trigger enabled for input line 3
      
+    // Enable interrupt in the NVIC
+    NVIC_EnableIRQ( EXTI0_1_IRQn );
+    NVIC_SetPriority( EXTI0_1_IRQn, 2);
      
     /* Prepare to enter stop mode */
-    PWR->CR |= PWR_CR_CWUF; // clear the WUF flag after 2 clock cycles
+    PWR->CR |= PWR_CR_CWUF;      // clear the WUF flag after 2 clock cycles
     PWR->CR &= ~( PWR_CR_PDDS ); // Enter stop mode when the CPU enters deepsleep
+    // V_REFINT startup time ignored | V_REFINT off in LP mode | regulator in LP mode
+    PWR->CR |= PWR_CR_FWU | PWR_CR_ULP | PWR_CR_LPSDSR;
     RCC->CFGR |= RCC_CFGR_STOPWUCK; // HSI16 oscillator is wake-up from stop clock
     SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk; // low-power mode = stop mode
+     
+    __disable_irq();
+     
+    I2C1->CR1 &= ~I2C_CR1_PE;  // Address issue 2.5.1 in Errata
     __WFI(); // enter low-power mode
+     
+    I2C1->CR1 |= I2C_CR1_PE;
+     
+    __enable_irq(); // <-- go to isr
 }
 
 void enter_Standby( void )
@@ -742,6 +755,9 @@ void enter_Sleep( void )
     /* Configure low-power mode */
     SCB->SCR &= ~( SCB_SCR_SLEEPDEEP_Msk );  // low-power mode = sleep mode
     SCB->SCR |= SCB_SCR_SLEEPONEXIT_Msk;     // reenter low-power mode after ISR
+
+    __HAL_RCC_GPIOA_CLK_DISABLE();
+    __HAL_RCC_I2C1_CLK_DISABLE();
 
     /* Configure PB0 as External Interrupt */
     GPIOB->MODER &= ~( GPIO_MODER_MODE3 ); // PB3 is in Input mode
