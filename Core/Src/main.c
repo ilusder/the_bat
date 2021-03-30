@@ -106,6 +106,7 @@ static void MX_RTC_Init(void);
 static void MX_TIM21_Init(void);
 static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
+void enter_LPSleep( void );
 void enter_Sleep( void );
 void enter_Stop( void );
 void enter_Standby( void ); 
@@ -182,8 +183,8 @@ int main(void)
         
         break;
       case SHOW_LOGO:
-        ssd1306_SetCursor(13, 10);
-        ssd1306_WriteString("The Bat!", Font_11x18, White);
+        ssd1306_SetCursor(17, 3);
+        ssd1306_WriteString("Bat TC", Font_16x26, White);
         ssd1306_UpdateScreen(&hi2c1);
         HAL_Delay(3000);
         NextState = PROX_CONFIG_FOR_POLLING;
@@ -245,6 +246,8 @@ int main(void)
         HAL_RED_EYE_RIGHT_PWM_OFF;
         HAL_GREEN_EYE_LEFT_PWM_OFF;
         HAL_GREEN_EYE_RIGHT_PWM_OFF;
+        HAL_WING_LEFT_PWM_OFF;
+        HAL_WING_RIGHT_PWM_OFF;
         //set-up proximity interrupt
         APDS9960_clearProximityInt(&hi2c1);
         APDS9960_clearAmbientLightInt(&hi2c1);
@@ -253,6 +256,11 @@ int main(void)
         enter_Stop();
         __HAL_RCC_GPIOA_CLK_ENABLE();
         __HAL_RCC_I2C1_CLK_ENABLE();
+        __HAL_RCC_GPIOC_CLK_ENABLE();
+        __HAL_RCC_USART1_CLK_ENABLE();
+        __HAL_RCC_TIM21_CLK_ENABLE();
+        HAL_WING_LEFT_PWM_ON;
+        HAL_WING_RIGHT_PWM_ON;
         ssd1306_Display_On(&hi2c1);
         NextState = PROX_CONFIG_FOR_POLLING;
         break;
@@ -699,6 +707,43 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void enter_LPSleep( void )
+{
+    /* 1. The Flash memory can be switched off by using the control bits
+              (SLEEP_PD in the FLASH_ACR register). This reduces power consumption
+              but increases the wake-up time. */
+    FLASH->ACR |= FLASH_ACR_SLEEP_PD;
+    /* 2. Each digital IP clock must be enabled or disabled by using the
+                RCC_APBxENR and RCC_AHBENR registers */
+    RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+    /* 3. The frequency of the system clock must be decreased to not exceed the
+                frequency of f_MSI range1. */
+
+    __HAL_RCC_GPIOA_CLK_DISABLE();
+    __HAL_RCC_GPIOC_CLK_DISABLE();
+    __HAL_RCC_USART1_CLK_DISABLE();
+    __HAL_RCC_TIM21_CLK_DISABLE();
+    __HAL_RCC_I2C1_CLK_DISABLE();
+
+    /* Configure PB0 as External Interrupt */
+    GPIOB->MODER &= ~( GPIO_MODER_MODE3 ); // PB3 is in Input mode
+    EXTI->IMR |= EXTI_IMR_IM3; // interrupt request from line 3 not masked
+    EXTI->FTSR |= EXTI_FTSR_TR3; // rising trigger enabled for input line 3
+     
+    // Enable interrupt in the NVIC
+    NVIC_EnableIRQ( EXTI0_1_IRQn );
+    NVIC_SetPriority( EXTI0_1_IRQn, 2);
+
+    /* 4. The regulator is forced in low-power mode by software
+                (LPSDSR bits set ) */
+    PWR->CR |= PWR_CR_LPSDSR; // voltage regulator in low-power mode during sleep
+    /* 5. Follow the steps described in Section 6.3.5: Entering low-power mode */
+    SCB->SCR &= ~( SCB_SCR_SLEEPDEEP_Msk ); // low-power mode = sleep mode
+    SCB->SCR |= SCB_SCR_SLEEPONEXIT_Msk; // reenter low-power mode after ISR
+    __WFI(); // enter low-power mode
+}
+
+
 void enter_Stop( void )
 {   
         /* Enable Clocks */
@@ -724,10 +769,7 @@ void enter_Stop( void )
      
     __disable_irq();
      
-    I2C1->CR1 &= ~I2C_CR1_PE;  // Address issue 2.5.1 in Errata
     __WFI(); // enter low-power mode
-     
-    I2C1->CR1 |= I2C_CR1_PE;
      
     __enable_irq(); // <-- go to isr
 }
