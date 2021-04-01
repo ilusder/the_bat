@@ -92,6 +92,7 @@ DMA_HandleTypeDef hdma_usart1_tx;
 uint8_t prox_data_ready = 0;
 MState CurrentState = POWERUP;
 MState NextState;
+uint8_t Sleep_State = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -205,6 +206,11 @@ int main(void)
         }
         else if (prox_data > 200)
         {
+          //if proximity detected without interrupt
+          if (Sleep_State == 1)
+          {
+            Sleep_State = 0;
+          }
           previous_prox_data = prox_data;
           HAL_TIM_Base_Stop_IT(&htim21);
           NextState = TEMP_MEASURE;
@@ -220,6 +226,8 @@ int main(void)
         sprintf(string_disp, "%.2f'C", temp);
         ssd1306_WriteString(string_disp, Font_16x26, White);
         ssd1306_Display_On(&hi2c1);
+        HAL_WING_LEFT_PWM_ON;
+        HAL_WING_RIGHT_PWM_ON;
         ssd1306_UpdateScreen(&hi2c1);
         if (temp < 37.3)
         {
@@ -240,6 +248,7 @@ int main(void)
       case GOTO_SLEEP:
         //display off
         HAL_TIM_Base_Stop_IT(&htim21);
+        HAL_LPTIM_TimeOut_Start_IT(&hlptim1, 65535, 32767);
         ssd1306_Display_Off(&hi2c1);
         APDS9960_enableProximitySensor(&hi2c1, 1);
         //LEDS OFF
@@ -254,15 +263,22 @@ int main(void)
         APDS9960_clearAmbientLightInt(&hi2c1);
         mlx90614SleepMode(&hi2c1);
         //SLEEP
-        enter_Stop();
+        Sleep_State = 1;
+        //enter_Stop();
+        NextState = WAKE_UP;
+      case WAKE_UP:
         __HAL_RCC_GPIOA_CLK_ENABLE();
         __HAL_RCC_I2C1_CLK_ENABLE();
         __HAL_RCC_GPIOC_CLK_ENABLE();
         __HAL_RCC_USART1_CLK_ENABLE();
         __HAL_RCC_TIM21_CLK_ENABLE();
-        HAL_WING_LEFT_PWM_ON;
-        HAL_WING_RIGHT_PWM_ON;
-        ssd1306_Display_On(&hi2c1);
+        // if no interrupt - stay Dislay off
+        if (0 == Sleep_State)
+        {
+          HAL_WING_LEFT_PWM_ON;
+          HAL_WING_RIGHT_PWM_ON;
+          ssd1306_Display_On(&hi2c1);
+        }
         NextState = PROX_CONFIG_FOR_POLLING;
         break;
       default:
@@ -408,7 +424,7 @@ static void MX_LPTIM1_Init(void)
   /* USER CODE END LPTIM1_Init 1 */
   hlptim1.Instance = LPTIM1;
   hlptim1.Init.Clock.Source = LPTIM_CLOCKSOURCE_APBCLOCK_LPOSC;
-  hlptim1.Init.Clock.Prescaler = LPTIM_PRESCALER_DIV8;
+  hlptim1.Init.Clock.Prescaler = LPTIM_PRESCALER_DIV1;
   hlptim1.Init.Trigger.Source = LPTIM_TRIGSOURCE_SOFTWARE;
   hlptim1.Init.OutputPolarity = LPTIM_OUTPUTPOLARITY_HIGH;
   hlptim1.Init.UpdateMode = LPTIM_UPDATE_IMMEDIATE;
@@ -769,8 +785,10 @@ void enter_Sleep( void )
 
     /* Configure PB0 as External Interrupt */
     GPIOB->MODER &= ~( GPIO_MODER_MODE3 ); // PB3 is in Input mode
-    EXTI->IMR |= EXTI_IMR_IM3; // interrupt request from line 3 not masked
+    EXTI->IMR |= EXTI_IMR_IM3 | EXTI_IMR_IM29; // interrupt request from line 3 not masked
     EXTI->FTSR |= EXTI_FTSR_TR3; // rising trigger enabled for input line 3
+
+
      
     /* Ensure Flash memory stays on */
     FLASH->ACR &= ~FLASH_ACR_SLEEP_PD;

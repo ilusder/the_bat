@@ -65,6 +65,7 @@ extern DMA_HandleTypeDef hdma_usart1_tx;
 /* USER CODE BEGIN EV */
 extern MState CurrentState;
 extern MState NextState;
+extern uint8_t Sleep_State;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -152,6 +153,8 @@ void EXTI2_3_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI2_3_IRQn 0 */
   CurrentState = TEMP_MEASURE;
+  // stop sleeping
+  Sleep_State = 0;
   /* USER CODE END EXTI2_3_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_3);
   /* USER CODE BEGIN EXTI2_3_IRQn 1 */
@@ -194,7 +197,8 @@ void DMA1_Channel4_5_6_7_IRQHandler(void)
 void LPTIM1_IRQHandler(void)
 {
   /* USER CODE BEGIN LPTIM1_IRQn 0 */
-  NextState = GOTO_SLEEP;
+  NextState = WAKE_UP;
+  HAL_LPTIM_TimeOut_Stop_IT(&hlptim1);
   /* USER CODE END LPTIM1_IRQn 0 */
   HAL_LPTIM_IRQHandler(&hlptim1);
   /* USER CODE BEGIN LPTIM1_IRQn 1 */
