@@ -126,7 +126,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
   uint8_t prox_data;
-  uint8_t previous_prox_data;
+  uint8_t previous_prox_data = 0;
   float temp;
   char string_disp[11];
   /* USER CODE END 1 */
@@ -198,7 +198,7 @@ int main(void)
         break;
       case WAIT_FOR_HAND:
         APDS9960_readProximity(&hi2c1, &prox_data);
-        if (prox_data < 30 && previous_prox_data > 30)
+        if (prox_data < 30 && (previous_prox_data > 30 || previous_prox_data ==0))
         {
           previous_prox_data = prox_data;
           __HAL_TIM_SET_COUNTER(&htim21, 10);
@@ -248,7 +248,6 @@ int main(void)
       case GOTO_SLEEP:
         //display off
         HAL_TIM_Base_Stop_IT(&htim21);
-        HAL_LPTIM_TimeOut_Start_IT(&hlptim1, 65535, 32767);
         ssd1306_Display_Off(&hi2c1);
         APDS9960_enableProximitySensor(&hi2c1, 1);
         //LEDS OFF
@@ -264,7 +263,8 @@ int main(void)
         mlx90614SleepMode(&hi2c1);
         //SLEEP
         Sleep_State = 1;
-        //enter_Stop();
+        HAL_LPTIM_TimeOut_Start_IT(&hlptim1, 65535, 32767);
+        enter_Stop();
         NextState = WAKE_UP;
       case WAKE_UP:
         __HAL_RCC_GPIOA_CLK_ENABLE();
