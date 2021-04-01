@@ -264,7 +264,9 @@ int main(void)
         //SLEEP
         Sleep_State = 1;
         HAL_LPTIM_TimeOut_Start_IT(&hlptim1, 65535, 32767);
+        HAL_SuspendTick();
         enter_Stop();
+        HAL_ResumeTick();
         NextState = WAKE_UP;
       case WAKE_UP:
         __HAL_RCC_GPIOA_CLK_ENABLE();
@@ -359,6 +361,9 @@ static void MX_NVIC_Init(void)
   /* TIM21_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(TIM21_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(TIM21_IRQn);
+  /* LPTIM1_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(LPTIM1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(LPTIM1_IRQn);
 }
 
 /**
@@ -424,7 +429,7 @@ static void MX_LPTIM1_Init(void)
   /* USER CODE END LPTIM1_Init 1 */
   hlptim1.Instance = LPTIM1;
   hlptim1.Init.Clock.Source = LPTIM_CLOCKSOURCE_APBCLOCK_LPOSC;
-  hlptim1.Init.Clock.Prescaler = LPTIM_PRESCALER_DIV1;
+  hlptim1.Init.Clock.Prescaler = LPTIM_PRESCALER_DIV8;
   hlptim1.Init.Trigger.Source = LPTIM_TRIGSOURCE_SOFTWARE;
   hlptim1.Init.OutputPolarity = LPTIM_OUTPUTPOLARITY_HIGH;
   hlptim1.Init.UpdateMode = LPTIM_UPDATE_IMMEDIATE;
