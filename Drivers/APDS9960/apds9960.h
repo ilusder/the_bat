@@ -140,13 +140,13 @@
 /* Default values */
 #define DEFAULT_ATIME           219     // 103ms
 #define DEFAULT_WTIME           246     // 27ms
-#define DEFAULT_PROX_PPULSE     0x87    // 16us, 8 pulses
+#define DEFAULT_PROX_PPULSE     0x48    // 16us, 8 pulses
 #define DEFAULT_GESTURE_PPULSE  0x89    // 16us, 10 pulses
 #define DEFAULT_POFFSET_UR      0       // 0 offset
 #define DEFAULT_POFFSET_DL      0       // 0 offset      
 #define DEFAULT_CONFIG1         0x60    // No 12x wait (WTIME) factor
-#define DEFAULT_LDRIVE          LED_DRIVE_50MA
-#define DEFAULT_PGAIN           PGAIN_4X
+#define DEFAULT_LDRIVE          LED_DRIVE_12_5MA
+#define DEFAULT_PGAIN           PGAIN_8X
 #define DEFAULT_AGAIN           AGAIN_4X
 #define DEFAULT_PILT            0       // Low proximity threshold
 #define DEFAULT_PIHT            150      // High proximity threshold

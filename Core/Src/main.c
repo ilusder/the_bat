@@ -193,7 +193,7 @@ int main(void)
         break;
       case PROX_CONFIG_FOR_POLLING:
         APDS9960_enableProximitySensor(&hi2c1, 0);
-        APDS9960_setProximityGain(&hi2c1, PGAIN_2X);
+        APDS9960_setProximityGain(&hi2c1, PGAIN_8X);
         NextState = WAIT_FOR_HAND;
         break;
       case WAIT_FOR_HAND:
