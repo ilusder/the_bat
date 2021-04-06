@@ -199,6 +199,7 @@ void LPTIM1_IRQHandler(void)
   /* USER CODE BEGIN LPTIM1_IRQn 0 */
   NextState = WAKE_UP;
   HAL_LPTIM_TimeOut_Stop_IT(&hlptim1);
+  HAL_TIM_Base_Start_IT(&htim21);
   /* USER CODE END LPTIM1_IRQn 0 */
   HAL_LPTIM_IRQHandler(&hlptim1);
   /* USER CODE BEGIN LPTIM1_IRQn 1 */

@@ -263,7 +263,7 @@ int main(void)
         mlx90614SleepMode(&hi2c1);
         //SLEEP
         Sleep_State = 1;
-        HAL_LPTIM_TimeOut_Start_IT(&hlptim1, 65535, 32767);
+        HAL_LPTIM_TimeOut_Start_IT(&hlptim1, 66665535, 65535);
         HAL_SuspendTick();
         enter_Stop();
         HAL_ResumeTick();
@@ -745,6 +745,12 @@ void enter_Stop( void )
     // Enable interrupt in the NVIC
     NVIC_EnableIRQ( EXTI0_1_IRQn );
     NVIC_SetPriority( EXTI0_1_IRQn, 2);
+
+    __HAL_RCC_GPIOA_CLK_DISABLE();
+    __HAL_RCC_GPIOC_CLK_DISABLE();
+    __HAL_RCC_USART1_CLK_DISABLE();
+    __HAL_RCC_TIM21_CLK_DISABLE();
+    __HAL_RCC_I2C1_CLK_DISABLE();
      
     /* Prepare to enter stop mode */
     PWR->CR |= PWR_CR_CWUF;      // clear the WUF flag after 2 clock cycles
