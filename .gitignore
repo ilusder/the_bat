@@ -55,3 +55,7 @@ Backup*
 
 # VS Code
 .vscode
+
+# Meta
+build/
+.metadata/
