@@ -48,11 +48,11 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define HAL_RED_EYE_LEFT_PWM_OFF HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1)
-#define HAL_RED_EYE_LEFT_PWM_ON HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1) 
+#define HAL_RED_EYE_LEFT_PWM_OFF HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_2)
+#define HAL_RED_EYE_LEFT_PWM_ON HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2) 
 
-#define HAL_GREEN_EYE_LEFT_PWM_OFF HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_2)
-#define HAL_GREEN_EYE_LEFT_PWM_ON HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2)
+#define HAL_GREEN_EYE_LEFT_PWM_OFF HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1)
+#define HAL_GREEN_EYE_LEFT_PWM_ON HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1)
 
 #define HAL_RED_EYE_RIGHT_PWM_OFF HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_4)
 #define HAL_RED_EYE_RIGHT_PWM_ON HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4) 
@@ -483,7 +483,7 @@ static void MX_TIM22_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 1;
+  sConfigOC.Pulse = 20;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim22, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
