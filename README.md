@@ -1,3 +1,4 @@
+![20211108_090744](https://user-images.githubusercontent.com/37861389/140699445-385283c6-32ea-4d05-aac2-e19071e8d72e.jpg)
 # Bat thermometer
 
 
